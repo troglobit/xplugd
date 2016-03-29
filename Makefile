@@ -1,25 +1,25 @@
-#See LICENSE for copyright and license details
+# See LICENSE for copyright and license details
 
-TARGET			:= srandrd
-SOURCE			:= srandrd.c
-VERSION			:= 0.5
-COPYRIGHT		:= "(C) 2012-2014 Stefan Bolte"
-LICENSE			:= "MIT/X Consortium"
+TARGET          := srandrd
+SOURCE          := srandrd.c
+VERSION         := 0.6-dev
+COPYRIGHT       := "(C) 2012-2015 Stefan Bolte"
+LICENSE         := "MIT/X Consortium"
 
-DISTDIR 		:= $(TARGET)-$(VERSION)
+DISTDIR         := $(TARGET)-$(VERSION)
 
-PREFIX			?= /usr
-INSTALLDIR	:= $(DESTDIR)$(PREFIX)
+PREFIX          ?= /usr
+INSTALLDIR      := $(DESTDIR)$(PREFIX)
 
-MANPREFIX		?= $(PREFIX)/share/man
-MANPREFIX		:= $(DESTDIR)$(MANPREFIX)
+MANPREFIX       ?= $(PREFIX)/share/man
+MANPREFIX       := $(DESTDIR)$(MANPREFIX)
 
-CFLAGS		:= -Wall -Os -pedantic -std=c99 #-Werror -Wextra
-CPPFLAGS  += -D_DEFAULT_SOURCE
-CPPFLAGS  += -DNAME=\"$(TARGET)\" -DVERSION=\"$(VERSION)\" 
-CPPFLAGS	+= -DCOPYRIGHT=\"$(COPYRIGHT)\" -DLICENSE=\"$(LICENSE)\"
+CFLAGS          := -O2 -W -Wall -Wextra -pedantic -std=c99
+CPPFLAGS        += -D_DEFAULT_SOURCE
+CPPFLAGS        += -DNAME=\"$(TARGET)\" -DVERSION=\"$(VERSION)\"
+CPPFLAGS        += -DCOPYRIGHT=\"$(COPYRIGHT)\" -DLICENSE=\"$(LICENSE)\"
 
-LDFLAGS		:= -lX11 -lXrandr
+LDFLAGS         := -lX11 -lXrandr
 
 all: $(TARGET)
 
