@@ -17,153 +17,161 @@
 
 char *con_actions[] = { "connected", "disconnected", "unknown" };
 
-static void 
-xerror(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stderr, format, args);
-    va_end(args);
-    exit(EXIT_FAILURE);
+static void xerror(const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+	exit(EXIT_FAILURE);
 }
 
-static int 
-error_handler(void) {
-    exit(EXIT_FAILURE);
+static int error_handler(void)
+{
+	exit(EXIT_FAILURE);
 }
 
-static void 
-catch_child(int sig) {
-    (void)sig;
-    while (waitpid(-1, NULL, WNOHANG) > 0);
+static void catch_child(int sig)
+{
+	(void)sig;
+	while (waitpid(-1, NULL, WNOHANG) > 0) ;
 }
 
-static void 
-help(int status) {
-    fprintf(stderr, "Usage: "NAME" [OPTIONS] /path/to/script [optional script args]\n\n"
-            "Options:\n"
-            "   -h  Print this help and exit\n"
-            "   -n  Do not fork to background\n"
-	    "   -v  Enable verbose debug output to stdout\n"
-            "   -V  Print version information and exit\n");
-    exit(status);
+static void help(int status)
+{
+	fprintf(stderr, "Usage: " NAME " [OPTIONS] /path/to/script [optional script args]\n\n"
+		"Options:\n"
+		"   -h  Print this help and exit\n"
+		"   -n  Do not fork to background\n"
+		"   -v  Enable verbose debug output to stdout\n" "   -V  Print version information and exit\n");
+	exit(status);
 }
 
-static void 
-version(void) {
-  fprintf(stderr, "    This is : "NAME"\n"
-                  "    Version : "VERSION"\n"
-                  "  Builddate : "__DATE__" "__TIME__"\n"
-                  "  Copyright : "COPYRIGHT"\n"
-                  "    License : "LICENSE"\n");
-  exit(EXIT_SUCCESS);
+static void version(void)
+{
+	fprintf(stderr, "    This is : " NAME "\n"
+		"    Version : " VERSION "\n"
+		"  Builddate : " __DATE__ " " __TIME__ "\n" "  Copyright : " COPYRIGHT "\n" "    License : " LICENSE "\n");
+	exit(EXIT_SUCCESS);
 }
 
-int 
-main(int argc, char **argv) {
-    XEvent ev;
-    Display *dpy;
-    int daemonize = 1, args = 1, verbose = 0;
-    char buf[BUFFER_SIZE], old_msg[BUFFER_SIZE] = "";
-    uid_t uid;
+int main(int argc, char **argv)
+{
+	XEvent ev;
+	Display *dpy;
+	int daemonize = 1, args = 1, verbose = 0;
+	char buf[BUFFER_SIZE], old_msg[BUFFER_SIZE] = "";
+	uid_t uid;
 
-    if (argc < 2) 
-        help(EXIT_FAILURE);
+	if (argc < 2)
+		help(EXIT_FAILURE);
 
-    for (args = 1; args < argc && *(argv[args]) == '-'; args++) {
-        switch(argv[args][1]) {
-            case 'V' : version();     
-            case 'n' : daemonize = 0; break;
-            case 'v' : verbose++; break;
-            case 'h' : help(EXIT_SUCCESS);
-            default  : help(EXIT_FAILURE);
-        }
-    }
-    if (argv[args] == NULL)
-        help(EXIT_FAILURE);
+	for (args = 1; args < argc && *(argv[args]) == '-'; args++) {
+		switch (argv[args][1]) {
+		case 'V':
+			version();
+		case 'n':
+			daemonize = 0;
+			break;
+		case 'v':
+			verbose++;
+			break;
+		case 'h':
+			help(EXIT_SUCCESS);
+		default:
+			help(EXIT_FAILURE);
+		}
+	}
+	if (argv[args] == NULL)
+		help(EXIT_FAILURE);
 
-    if (((uid = getuid()) == 0) || uid != geteuid()) 
-        xerror("%s may not run as root\n", NAME);
+	if (((uid = getuid()) == 0) || uid != geteuid())
+		xerror("%s may not run as root\n", NAME);
 
-    if ((dpy = XOpenDisplay(NULL)) == NULL)
-        xerror("Cannot open display\n");
+	if ((dpy = XOpenDisplay(NULL)) == NULL)
+		xerror("Cannot open display\n");
 
-    if (daemonize) {
-        switch(fork()) {
-            case -1 : xerror("Could not fork\n");
-            case 0  : break;
-            default : exit(EXIT_SUCCESS);
-        }
-        setsid();
+	if (daemonize) {
+		switch (fork()) {
+		case -1:
+			xerror("Could not fork\n");
+		case 0:
+			break;
+		default:
+			exit(EXIT_SUCCESS);
+		}
+		setsid();
 
-        close(STDIN_FILENO);
-        close(STDERR_FILENO);
-        close(STDOUT_FILENO);
-    }
-    signal(SIGCHLD, catch_child);
+		close(STDIN_FILENO);
+		close(STDERR_FILENO);
+		close(STDOUT_FILENO);
+	}
+	signal(SIGCHLD, catch_child);
 
-    XRRSelectInput(dpy, DefaultRootWindow(dpy), RROutputChangeNotifyMask);
-    XSync(dpy, False);
-    XSetIOErrorHandler((XIOErrorHandler) error_handler);
-    while(1) {
-        if (!XNextEvent(dpy, &ev)) {
-	    XRROutputInfo *info;
-            XRRScreenResources *resources;
+	XRRSelectInput(dpy, DefaultRootWindow(dpy), RROutputChangeNotifyMask);
+	XSync(dpy, False);
+	XSetIOErrorHandler((XIOErrorHandler) error_handler);
+	while (1) {
+		if (!XNextEvent(dpy, &ev)) {
+			XRROutputInfo *info;
+			XRRScreenResources *resources;
 
-	    resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
-            if (resources == NULL) {
-                fprintf(stderr, "Could not get screen resources\n");
-                continue;
-            }
+			resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
+			if (resources == NULL) {
+				fprintf(stderr, "Could not get screen resources\n");
+				continue;
+			}
 
-            info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
-            if (info == NULL) {
-                XRRFreeScreenResources(resources);
-                fprintf(stderr, "Could not get output info\n");
-                continue;
-            }
+			info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
+			if (info == NULL) {
+				XRRFreeScreenResources(resources);
+				fprintf(stderr, "Could not get output info\n");
+				continue;
+			}
 
-	    /* Check for duplicate plug events */
-            snprintf(buf, sizeof(buf), "%s %s", info->name, con_actions[info->connection]);
-	    if (!strcmp(buf, old_msg)) {
-		    if (verbose)
-			    printf("Same message as last time, time %lu, skipping ...\n", info->timestamp);
-		    XRRFreeScreenResources(resources);
-		    XRRFreeOutputInfo(info);
-		    continue;
-	    }
-	    strcpy(old_msg, buf);
+			/* Check for duplicate plug events */
+			snprintf(buf, sizeof(buf), "%s %s", info->name, con_actions[info->connection]);
+			if (!strcmp(buf, old_msg)) {
+				if (verbose)
+					printf("Same message as last time, time %lu, skipping ...\n", info->timestamp);
+				XRRFreeScreenResources(resources);
+				XRRFreeOutputInfo(info);
+				continue;
+			}
+			strcpy(old_msg, buf);
 
-            if (verbose) {
-                printf("Event: %s %s\n", info->name, con_actions[info->connection]);
-                printf("Time: %lu\n", info->timestamp);
-                if (info->crtc == 0) {
-                    printf("Size: %lumm x %lumm\n", info->mm_width, info->mm_height);
-                }
-                else {
-                    printf("CRTC: %lu\n", info->crtc);
-                    XRRCrtcInfo *crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
-                    if (crtc != NULL) {
-                        printf("Size: %dx%d\n", crtc->width, crtc->height);
-                        XRRFreeCrtcInfo(crtc);
-                    }
-                }
-            }
+			if (verbose) {
+				printf("Event: %s %s\n", info->name, con_actions[info->connection]);
+				printf("Time: %lu\n", info->timestamp);
+				if (info->crtc == 0) {
+					printf("Size: %lumm x %lumm\n", info->mm_width, info->mm_height);
+				} else {
+					printf("CRTC: %lu\n", info->crtc);
+					XRRCrtcInfo *crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
 
-            XRRFreeScreenResources(resources);
-            XRRFreeOutputInfo(info);
+					if (crtc != NULL) {
+						printf("Size: %dx%d\n", crtc->width, crtc->height);
+						XRRFreeCrtcInfo(crtc);
+					}
+				}
+			}
 
-            if (fork() == 0) {
-                if (dpy)
-                    close(ConnectionNumber(dpy));
-                setsid();
-                setenv("SRANDRD_ACTION", buf, False);
-		XRRFreeScreenResources(resources);
-		XRRFreeOutputInfo(info);
-                execvp(argv[args], &(argv[args]));
-		exit(0);	/* We only get here if execvp() fails */
-            }
-        }
-    }
+			XRRFreeScreenResources(resources);
+			XRRFreeOutputInfo(info);
 
-    return EXIT_SUCCESS;
+			if (fork() == 0) {
+				if (dpy)
+					close(ConnectionNumber(dpy));
+				setsid();
+				setenv("SRANDRD_ACTION", buf, False);
+				XRRFreeScreenResources(resources);
+				XRRFreeOutputInfo(info);
+				execvp(argv[args], &(argv[args]));
+				exit(0);	/* We only get here if execvp() fails */
+			}
+		}
+	}
+
+	return EXIT_SUCCESS;
 }
