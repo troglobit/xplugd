@@ -58,7 +58,7 @@ main(int argc, char **argv) {
     XEvent ev;
     Display *dpy;
     int daemonize = 1, args = 1, verbose = 0;
-    char buf[BUFFER_SIZE];
+    char buf[BUFFER_SIZE], old_msg[BUFFER_SIZE] = "";
     uid_t uid;
 
     if (argc < 2) 
@@ -116,8 +116,17 @@ main(int argc, char **argv) {
                 continue;
             }
 
-            snprintf(buf, BUFFER_SIZE, "%s %s", info->name,
-                    con_actions[info->connection]);
+	    /* Check for duplicate plug events */
+            snprintf(buf, sizeof(buf), "%s %s", info->name, con_actions[info->connection]);
+	    if (!strcmp(buf, old_msg)) {
+		    if (verbose)
+			    printf("Same message as last time, time %lu, skipping ...\n", info->timestamp);
+		    XRRFreeScreenResources(resources);
+		    XRRFreeOutputInfo(info);
+		    continue;
+	    }
+	    strcpy(old_msg, buf);
+
             if (verbose) {
                 printf("Event: %s %s\n", info->name,
                         con_actions[info->connection]);
