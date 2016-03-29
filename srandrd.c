@@ -48,12 +48,12 @@ static void catch_child(int sig)
 		;
 }
 
-static int help(int status)
+static int usage(int status)
 {
 	printf("Usage: %s [OPTIONS] /path/to/script [optional script args]\n\n"
 	       "Options:\n"
-	       "   -h  Print this help and exit\n"
-	       "   -n  Do not fork to background\n"
+	       "   -h  Print this help text and exit\n"
+	       "   -n  Run in foreground, do not fork to background\n"
 	       "   -v  Enable verbose debug output to stdout\n"
 	       "   -V  Print version information and exit\n\n"
 	       "Bug report address: https://github.com/troglobit/srandrd/issues\n\n", __progname);
@@ -62,11 +62,7 @@ static int help(int status)
 
 static int version(void)
 {
-	printf("    This is : %s\n"
-	       "    Version : " VERSION "\n"
-	       "  Builddate : " __DATE__ " " __TIME__ "\n"
-	       "  Copyright : " COPYRIGHT "\n"
-	       "    License : " LICENSE "\n", __progname);
+	printf("v%s\n", VERSION);
 	return 0;
 }
 
@@ -79,12 +75,12 @@ int main(int argc, char **argv)
 	uid_t uid;
 
 	if (argc < 2)
-		help(1);
+		usage(1);
 
 	for (args = 1; args < argc && *(argv[args]) == '-'; args++) {
 		switch (argv[args][1]) {
 		case 'V':
-			version();
+			return version();
 
 		case 'n':
 			daemonize = 0;
@@ -95,15 +91,15 @@ int main(int argc, char **argv)
 			break;
 
 		case 'h':
-			return help(0);
+			return usage(0);
 
 		default:
-			return help(1);
+			return usage(1);
 		}
 	}
 
 	if (argv[args] == NULL)
-		help(1);
+		return usage(1);
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", __progname);
