@@ -143,16 +143,22 @@ main(int argc, char **argv) {
                     }
                 }
             }
+
+            XRRFreeScreenResources(resources);
+            XRRFreeOutputInfo(info);
+
             if (fork() == 0) {
                 if (dpy)
                     close(ConnectionNumber(dpy));
                 setsid();
                 setenv("SRANDRD_ACTION", buf, False);
+		XRRFreeScreenResources(resources);
+		XRRFreeOutputInfo(info);
                 execvp(argv[args], &(argv[args]));
+		exit(0);	/* We only get here if execvp() fails */
             }
-            XRRFreeScreenResources(resources);
-            XRRFreeOutputInfo(info);
         }
     }
+
     return EXIT_SUCCESS;
 }
