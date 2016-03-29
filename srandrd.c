@@ -101,15 +101,16 @@ main(int argc, char **argv) {
     XSetIOErrorHandler((XIOErrorHandler) error_handler);
     while(1) {
         if (!XNextEvent(dpy, &ev)) {
-            XRRScreenResources *resources = XRRGetScreenResources(OCNE(&ev)->display,
-                    OCNE(&ev)->window);
+	    XRROutputInfo *info;
+            XRRScreenResources *resources;
+
+	    resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
             if (resources == NULL) {
                 fprintf(stderr, "Could not get screen resources\n");
                 continue;
             }
 
-            XRROutputInfo *info = XRRGetOutputInfo(OCNE(&ev)->display, resources,
-                    OCNE(&ev)->output);
+            info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
             if (info == NULL) {
                 XRRFreeScreenResources(resources);
                 fprintf(stderr, "Could not get output info\n");
@@ -128,8 +129,7 @@ main(int argc, char **argv) {
 	    strcpy(old_msg, buf);
 
             if (verbose) {
-                printf("Event: %s %s\n", info->name,
-                        con_actions[info->connection]);
+                printf("Event: %s %s\n", info->name, con_actions[info->connection]);
                 printf("Time: %lu\n", info->timestamp);
                 if (info->crtc == 0) {
                     printf("Size: %lumm x %lumm\n", info->mm_width, info->mm_height);
