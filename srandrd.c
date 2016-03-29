@@ -36,7 +36,8 @@ static int help(int status)
 	       "   -h  Print this help and exit\n"
 	       "   -n  Do not fork to background\n"
 	       "   -v  Enable verbose debug output to stdout\n"
-	       "   -V  Print version information and exit\n", __progname);
+	       "   -V  Print version information and exit\n\n"
+	       "Bug report address: https://github.com/troglobit/srandrd/issues\n\n", __progname);
 	return status;
 }
 
