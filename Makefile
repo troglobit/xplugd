@@ -8,7 +8,7 @@ LICENSE         := "MIT/X Consortium"
 
 DISTDIR         := $(TARGET)-$(VERSION)
 
-PREFIX          ?= /usr
+PREFIX          ?= /usr/local
 INSTALLDIR      := $(DESTDIR)$(PREFIX)
 
 MANPREFIX       ?= $(PREFIX)/share/man
