@@ -56,6 +56,8 @@ static int usage(int status)
 	       "   -n  Run in foreground, do not fork to background\n"
 	       "   -v  Enable verbose debug output to stdout\n"
 	       "   -V  Print version information and exit\n\n"
+	       "Copyright (C) 2012-2015 Stefan Bolte\n"
+	       "Copyright (C)      2016 Joachim Nilsson\n\n"
 	       "Bug report address: https://github.com/troglobit/srandrd/issues\n\n", __progname);
 	return status;
 }
