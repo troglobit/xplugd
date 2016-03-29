@@ -38,8 +38,9 @@ static void
 help(int status) {
     fprintf(stderr, "Usage: "NAME" [option] command\n\n"
             "Options:\n"
-            "   -h  Print this help and exit\n" 
-            "   -n  Don't fork to background\n" 
+            "   -h  Print this help and exit\n"
+            "   -n  Do not fork to background\n"
+	    "   -v  Enable verbose debug output to stdout\n"
             "   -V  Print version information and exit\n");
     exit(status);
 }
