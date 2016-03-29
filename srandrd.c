@@ -25,18 +25,21 @@ xerror(const char *format, ...) {
     va_end(args);
     exit(EXIT_FAILURE);
 }
+
 static int 
 error_handler(void) {
     exit(EXIT_FAILURE);
 }
+
 static void 
 catch_child(int sig) {
     (void)sig;
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
+
 static void 
 help(int status) {
-    fprintf(stderr, "Usage: "NAME" [option] command\n\n"
+    fprintf(stderr, "Usage: "NAME" [OPTIONS] /path/to/script [optional script args]\n\n"
             "Options:\n"
             "   -h  Print this help and exit\n"
             "   -n  Do not fork to background\n"
@@ -44,6 +47,7 @@ help(int status) {
             "   -V  Print version information and exit\n");
     exit(status);
 }
+
 static void 
 version(void) {
   fprintf(stderr, "    This is : "NAME"\n"
@@ -53,6 +57,7 @@ version(void) {
                   "    License : "LICENSE"\n");
   exit(EXIT_SUCCESS);
 }
+
 int 
 main(int argc, char **argv) {
     XEvent ev;

@@ -12,10 +12,10 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl hnvV
-.Ar COMMAND
+.Ar SCRIPT
 .Sh DESCRIPTION
 .Nm
-is a tool that executes a command on xrandr output change events, i.e.,
+is a tool that executes a script on xrandr output change events, i.e.,
 if a monitor is plugged or unplugged.  By default srandrd forks to the
 background and exits when the X server exits.
 .Sh OPTIONS
@@ -34,9 +34,14 @@ Show version information and exit
 .Pp
 The environment variable
 .Ar SRANDRD_ACTION
-is passed to the command with the following value:
+passed to the script has the following syntax:
 .Bd -literal -offset indent
 DISPLAYNAME [connected|disconnected|unknown]
+.Ed
+.Pp
+E.g.
+.Bd -literal -offset indent
+HDMI3 connected
 .Ed
 .Sh EXAMPLE
 Here is an example of how to use
