@@ -16,7 +16,7 @@ MANPREFIX       := $(DESTDIR)$(MANPREFIX)
 
 CFLAGS          := -O2 -W -Wall -Wextra -pedantic -std=c99
 CPPFLAGS        += -D_DEFAULT_SOURCE
-CPPFLAGS        += -DNAME=\"$(TARGET)\" -DVERSION=\"$(VERSION)\"
+CPPFLAGS        += -DVERSION=\"$(VERSION)\"
 CPPFLAGS        += -DCOPYRIGHT=\"$(COPYRIGHT)\" -DLICENSE=\"$(LICENSE)\"
 
 LDFLAGS         := -lX11 -lXrandr

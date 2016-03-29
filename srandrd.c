@@ -1,31 +1,21 @@
 /* See LICENSE for copyright and license details
  * srandrd - simple randr daemon
  */
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <fcntl.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
 #define OCNE(X) ((XRROutputChangeNotifyEvent*)X)
-#define BUFFER_SIZE 128
+#define MSG_LEN 128
 
-char *con_actions[] = { "connected", "disconnected", "unknown" };
-
-static void xerror(const char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	vfprintf(stderr, format, args);
-	va_end(args);
-	exit(EXIT_FAILURE);
-}
+static char *con_actions[] = { "connected", "disconnected", "unknown" };
+extern char *__progname;
 
 static int error_handler(void)
 {
@@ -35,25 +25,29 @@ static int error_handler(void)
 static void catch_child(int sig)
 {
 	(void)sig;
-	while (waitpid(-1, NULL, WNOHANG) > 0) ;
+	while (waitpid(-1, NULL, WNOHANG) > 0)
+		;
 }
 
-static void help(int status)
+static int help(int status)
 {
-	fprintf(stderr, "Usage: " NAME " [OPTIONS] /path/to/script [optional script args]\n\n"
-		"Options:\n"
-		"   -h  Print this help and exit\n"
-		"   -n  Do not fork to background\n"
-		"   -v  Enable verbose debug output to stdout\n" "   -V  Print version information and exit\n");
-	exit(status);
+	printf("Usage: %s [OPTIONS] /path/to/script [optional script args]\n\n"
+	       "Options:\n"
+	       "   -h  Print this help and exit\n"
+	       "   -n  Do not fork to background\n"
+	       "   -v  Enable verbose debug output to stdout\n"
+	       "   -V  Print version information and exit\n", __progname);
+	return status;
 }
 
-static void version(void)
+static int version(void)
 {
-	fprintf(stderr, "    This is : " NAME "\n"
-		"    Version : " VERSION "\n"
-		"  Builddate : " __DATE__ " " __TIME__ "\n" "  Copyright : " COPYRIGHT "\n" "    License : " LICENSE "\n");
-	exit(EXIT_SUCCESS);
+	printf("    This is : %s\n"
+	       "    Version : " VERSION "\n"
+	       "  Builddate : " __DATE__ " " __TIME__ "\n"
+	       "  Copyright : " COPYRIGHT "\n"
+	       "    License : " LICENSE "\n", __progname);
+	return EXIT_SUCCESS;
 }
 
 int main(int argc, char **argv)
@@ -61,7 +55,7 @@ int main(int argc, char **argv)
 	XEvent ev;
 	Display *dpy;
 	int daemonize = 1, args = 1, verbose = 0;
-	char buf[BUFFER_SIZE], old_msg[BUFFER_SIZE] = "";
+	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
 	uid_t uid;
 
 	if (argc < 2)
@@ -71,75 +65,76 @@ int main(int argc, char **argv)
 		switch (argv[args][1]) {
 		case 'V':
 			version();
+
 		case 'n':
 			daemonize = 0;
 			break;
+
 		case 'v':
 			verbose++;
 			break;
+
 		case 'h':
-			help(EXIT_SUCCESS);
+			return help(EXIT_SUCCESS);
+
 		default:
-			help(EXIT_FAILURE);
+			return help(EXIT_FAILURE);
 		}
 	}
+
 	if (argv[args] == NULL)
 		help(EXIT_FAILURE);
 
-	if (((uid = getuid()) == 0) || uid != geteuid())
-		xerror("%s may not run as root\n", NAME);
+	if (((uid = getuid()) == 0) || uid != geteuid()) {
+		fprintf(stderr, "%s may not run as root\n", __progname);
+		exit(EXIT_FAILURE);
+	}
 
-	if ((dpy = XOpenDisplay(NULL)) == NULL)
-		xerror("Cannot open display\n");
+	if ((dpy = XOpenDisplay(NULL)) == NULL) {
+		fprintf(stderr, "Cannot open display\n");
+		exit(EXIT_FAILURE);
+	}
 
 	if (daemonize) {
-		switch (fork()) {
-		case -1:
-			xerror("Could not fork\n");
-		case 0:
-			break;
-		default:
-			exit(EXIT_SUCCESS);
+		if (daemon(0, 0)) {
+			fprintf(stderr, "Failed daemonizing: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
 		}
-		setsid();
-
-		close(STDIN_FILENO);
-		close(STDERR_FILENO);
-		close(STDOUT_FILENO);
 	}
 	signal(SIGCHLD, catch_child);
 
 	XRRSelectInput(dpy, DefaultRootWindow(dpy), RROutputChangeNotifyMask);
 	XSync(dpy, False);
-	XSetIOErrorHandler((XIOErrorHandler) error_handler);
+	XSetIOErrorHandler((XIOErrorHandler)error_handler);
+
 	while (1) {
 		if (!XNextEvent(dpy, &ev)) {
 			XRROutputInfo *info;
 			XRRScreenResources *resources;
 
 			resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
-			if (resources == NULL) {
+			if (!resources) {
 				fprintf(stderr, "Could not get screen resources\n");
 				continue;
 			}
 
 			info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
-			if (info == NULL) {
+			if (!info) {
 				XRRFreeScreenResources(resources);
 				fprintf(stderr, "Could not get output info\n");
 				continue;
 			}
 
 			/* Check for duplicate plug events */
-			snprintf(buf, sizeof(buf), "%s %s", info->name, con_actions[info->connection]);
-			if (!strcmp(buf, old_msg)) {
+			snprintf(msg, sizeof(msg), "%s %s", info->name, con_actions[info->connection]);
+			if (!strcmp(msg, old_msg)) {
 				if (verbose)
 					printf("Same message as last time, time %lu, skipping ...\n", info->timestamp);
 				XRRFreeScreenResources(resources);
 				XRRFreeOutputInfo(info);
 				continue;
 			}
-			strcpy(old_msg, buf);
+			strcpy(old_msg, msg);
 
 			if (verbose) {
 				printf("Event: %s %s\n", info->name, con_actions[info->connection]);
@@ -164,7 +159,7 @@ int main(int argc, char **argv)
 				if (dpy)
 					close(ConnectionNumber(dpy));
 				setsid();
-				setenv("SRANDRD_ACTION", buf, False);
+				setenv("SRANDRD_ACTION", msg, False);
 				XRRFreeScreenResources(resources);
 				XRRFreeOutputInfo(info);
 				execvp(argv[args], &(argv[args]));
@@ -175,3 +170,10 @@ int main(int argc, char **argv)
 
 	return EXIT_SUCCESS;
 }
+
+/**
+ * Local Variables:
+ *  indent-tabs-mode: t
+ *  c-file-style: "linux"
+ * End:
+ */
