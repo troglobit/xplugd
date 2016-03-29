@@ -1,18 +1,18 @@
 srandrd - simple randr daemon 
 =============================
 
-srandrd is a simple daemon that executes a command when the xorg output
-changes, i.e. a monitor is plugged on or is unplugged.  srandrd forks to
-the background by default and exits when the X server exits.
+`srandrd` is a simple daemon that detects when amonitor is plugged in or
+is unplugged.  It is very useful in combination with lightweight setups,
+e.g. when running a simple X window manager like [Awesome][1].
 
 
-USAGE
+Usage
 -----
 
     srandrd [option] /path/to/script [optional script args]
 
 
-OPTIONS
+Options
 -------
 
     -h  Show help and exit
@@ -21,7 +21,7 @@ OPTIONS
     -V  Show version info and exit
 
 
-EXAMPLE
+Example
 -------
 
 Example script
@@ -62,3 +62,6 @@ Origin & References
 the project at [BitBucket][2].  In 2016 Joachim Nilsson forked the code
 at [GitHub][3] for further development.
 
+[1]: https://awesome.naquadah.org
+[2]: http://bitbucket.org/portix/srandrd
+[3]: https://github.com/troglobit/srandard
