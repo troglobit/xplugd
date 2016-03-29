@@ -19,7 +19,7 @@ extern char *__progname;
 
 static int error_handler(void)
 {
-	exit(EXIT_FAILURE);
+	exit(1);
 }
 
 static void catch_child(int sig)
@@ -47,7 +47,7 @@ static int version(void)
 	       "  Builddate : " __DATE__ " " __TIME__ "\n"
 	       "  Copyright : " COPYRIGHT "\n"
 	       "    License : " LICENSE "\n", __progname);
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 int main(int argc, char **argv)
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	uid_t uid;
 
 	if (argc < 2)
-		help(EXIT_FAILURE);
+		help(1);
 
 	for (args = 1; args < argc && *(argv[args]) == '-'; args++) {
 		switch (argv[args][1]) {
@@ -75,30 +75,30 @@ int main(int argc, char **argv)
 			break;
 
 		case 'h':
-			return help(EXIT_SUCCESS);
+			return help(0);
 
 		default:
-			return help(EXIT_FAILURE);
+			return help(1);
 		}
 	}
 
 	if (argv[args] == NULL)
-		help(EXIT_FAILURE);
+		help(1);
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", __progname);
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	if ((dpy = XOpenDisplay(NULL)) == NULL) {
 		fprintf(stderr, "Cannot open display\n");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	if (daemonize) {
 		if (daemon(0, 0)) {
 			fprintf(stderr, "Failed daemonizing: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
+			exit(1);
 		}
 	}
 	signal(SIGCHLD, catch_child);
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 /**
