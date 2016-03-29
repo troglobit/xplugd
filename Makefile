@@ -44,11 +44,6 @@ uninstall:
 clean: 
 	$(RM) $(TARGET)
 
-doc: srandrd.1
-
-srandrd.1: srandrd.1.txt 
-	a2x --doctype manpage --format manpage $<
-
 dist: 
 	@echo "Creating tarball."
 	@hg archive -t tgz -X dist $(DISTDIR).tar.gz
