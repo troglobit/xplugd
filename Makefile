@@ -1,12 +1,13 @@
 # See LICENSE for copyright and license details
+.PHONY: all options clean install uninstall dist
 
-TARGET          := srandrd
-SOURCE          := srandrd.c
+#VERSION         := $(shell git tag -l | tail -1)
 VERSION         := 0.6-dev
-COPYRIGHT       := "(C) 2012-2015 Stefan Bolte"
-LICENSE         := "MIT/X Consortium"
-
-DISTDIR         := $(TARGET)-$(VERSION)
+EXEC            := srandrd
+OBJS            := $(EXEC).o
+MAN             := $(EXEC).1
+PKG             := $(EXEC)-$(VERSION)
+ARCHIVE         := $(PKG).tar.xz
 
 PREFIX          ?= /usr/local
 INSTALLDIR      := $(DESTDIR)$(PREFIX)
@@ -17,35 +18,37 @@ MANPREFIX       := $(DESTDIR)$(MANPREFIX)
 CFLAGS          := -O2 -W -Wall -Wextra -pedantic -std=c99
 CPPFLAGS        += -D_DEFAULT_SOURCE
 CPPFLAGS        += -DVERSION=\"$(VERSION)\"
-CPPFLAGS        += -DCOPYRIGHT=\"$(COPYRIGHT)\" -DLICENSE=\"$(LICENSE)\"
 
-LDFLAGS         := -lX11 -lXrandr
+LDLIBS          := -lX11 -lXrandr
 
-all: $(TARGET)
+all: $(EXEC)
 
-$(TARGET): $(SOURCE)
-	@echo $(CC) -o $@ $< $(CFLAGS) $(LDFLAGS)
-	@$(CC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
+.c.o:
+	@printf "  CC      $@\n"
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-install: 
-	@echo Installing executable to $(INSTALLDIR)/bin
+$(EXEC): $(OBJS)
+	@printf "  LINK    $@\n"
+	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+
+install: $(EXEC)
 	@install -d $(INSTALLDIR)/bin
-	@install -m 755 $(TARGET) $(INSTALLDIR)/bin/
-	@echo Installing manpage to $(MANPREFIX)/man1
+	@install -m 755 $(EXEC) $(INSTALLDIR)/bin
 	@install -d $(MANPREFIX)/man1
-	@install -m 644 $(TARGET).1 $(MANPREFIX)/man1
+	@install -m 644 $(MAN) $(MANPREFIX)/man1
 
 uninstall: 
-	@echo Removing executable from $(INSTALLDIR)/bin
-	@rm -f $(INSTALLDIR)/bin/$(TARGET)
-	@echo Removing manpage from $(INSTALLDIR)/bin
-	@rm -f $(MANPREFIX)/man1/$(TARGET).1
+	@$(RM) $(INSTALLDIR)/bin/$(EXEC)
+	@$(RM) $(MANPREFIX)/man1/$(MAN)
 
 clean: 
-	$(RM) $(TARGET)
+	@$(RM) $(EXEC)
+
+distclean: clean
+	@$(RM) $(OBJS) *~ *.bak core
 
 dist: 
-	@echo "Creating tarball."
-	@hg archive -t tgz -X dist $(DISTDIR).tar.gz
-
-.PHONY: all options clean install uninstall dist
+	@echo "Building xz tarball of $(PKG) in parent dir ..."
+	@git archive v$(VERSION) | xz > $(ARCHIVE)
+	@md5sum $(ARCHIVE) | tee $(ARCHIVE).md5
+	@mv -i $(ARCHIVE)* ../
