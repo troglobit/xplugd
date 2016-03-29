@@ -55,8 +55,10 @@ Example script
 ```
 
 
-AUTHOR
-------
+Origin & References
+-------------------
 
-Stefan Bolte <mailto:portix@gmx.net>
+`srandrd` was originally written by Stefan Bolte, who still maintains
+the project at [BitBucket][2].  In 2016 Joachim Nilsson forked the code
+at [GitHub][3] for further development.
 
