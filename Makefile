@@ -3,7 +3,7 @@
 
 #VERSION         := $(shell git tag -l | tail -1)
 VERSION         := 0.6-dev
-EXEC            := srandrd
+EXEC            := xplugd
 OBJS            := $(EXEC).o
 MAN             := $(EXEC).1
 PKG             := $(EXEC)-$(VERSION)

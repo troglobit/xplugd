@@ -9,7 +9,7 @@ DOCK=HDMI3
 DESKPOS=--left-of
 PRESPOS=--right-of
 
-set ${SRANDRD_ACTION}
+set ${XPLUG_EVENT}
 
 if [ "$2" = "disconnected" ]; then
     xrandr --output $1 --off

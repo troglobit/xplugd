@@ -1,7 +1,7 @@
-srandrd - simple randr daemon 
-=============================
+xplugd - monitor plug/unplug helper
+===================================
 
-`srandrd` is a simple daemon that detects when amonitor is plugged in or
+`xplugd` is a simple daemon that detects when amonitor is plugged in or
 is unplugged.  It is very useful in combination with lightweight setups,
 e.g. when running a simple X window manager like [Awesome][1].
 
@@ -9,7 +9,7 @@ e.g. when running a simple X window manager like [Awesome][1].
 Usage
 -----
 
-    srandrd [option] /path/to/script [optional script args]
+    xplugd [option] /path/to/script [optional script args]
 
 
 Options
@@ -38,7 +38,7 @@ Example script
     DESKPOS=--left-of
     PRESPOS=--right-of
     
-    set ${SRANDRD_ACTION}
+    set ${XPLUG_EVENT}
     
     if [ "$2" = "disconnected" ]; then
         xrandr --output $1 --off
@@ -58,10 +58,10 @@ Example script
 Origin & References
 -------------------
 
-`srandrd` was originally written by Stefan Bolte, who still maintains
-the project at [BitBucket][2].  In 2016 Joachim Nilsson forked the code
-at [GitHub][3] for further development.
+`xplugd` was originally written by Stefan Bolte, who still maintains it
+as `srandrd` at [BitBucket][2].  In 2016 Joachim Nilsson forked it as
+`xplugd` at [GitHub][3] for further development.
 
 [1]: https://awesome.naquadah.org
 [2]: http://bitbucket.org/portix/srandrd
-[3]: https://github.com/troglobit/srandard
+[3]: https://github.com/troglobit/xplugd

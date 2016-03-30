@@ -1,4 +1,4 @@
-/* srandrd - simple randr daemon
+/* xplugd - monitor plug/unplug helper
  *
  * Copyright (C) 2012-2015  Stefan Bolte <portix@gmx.net>
  * Copyright (C) 2016       Joachim Nilsson <troglobit@gmail.com>
@@ -58,7 +58,7 @@ static int usage(int status)
 	       "   -V  Print version information and exit\n\n"
 	       "Copyright (C) 2012-2015 Stefan Bolte\n"
 	       "Copyright (C)      2016 Joachim Nilsson\n\n"
-	       "Bug report address: https://github.com/troglobit/srandrd/issues\n\n", __progname);
+	       "Bug report address: https://github.com/troglobit/xplugd/issues\n\n", __progname);
 	return status;
 }
 
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 				if (dpy)
 					close(ConnectionNumber(dpy));
 				setsid();
-				setenv("SRANDRD_ACTION", msg, False);
+				setenv("XPLUG_EVENT", msg, False);
 				XRRFreeScreenResources(resources);
 				XRRFreeOutputInfo(info);
 				execvp(argv[args], &(argv[args]));
