@@ -37,6 +37,7 @@
 #define OCNE(X) ((XRROutputChangeNotifyEvent*)X)
 #define MSG_LEN 128
 
+static int   loglevel = LOG_NOTICE;
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 extern char *__progname;
 
@@ -62,9 +63,80 @@ static void catch_child(int sig)
 		;
 }
 
+static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev, char *cmd)
+{
+	char msg[MSG_LEN];
+	static char old_msg[MSG_LEN] = "";
+	XRROutputInfo *info;
+	XRRScreenResources *resources;
+
+	resources = XRRGetScreenResources(ev->display, ev->window);
+	if (!resources) {
+		syslog(LOG_ERR, "Could not get screen resources");
+		return;
+	}
+
+	info = XRRGetOutputInfo(ev->display, resources, ev->output);
+	if (!info) {
+		syslog(LOG_ERR, "Could not get output info");
+		XRRFreeScreenResources(resources);
+		return;
+	}
+
+	/* Check for duplicate plug events */
+	snprintf(msg, sizeof(msg), "%s %s", info->name, con_actions[info->connection]);
+	if (!strcmp(msg, old_msg)) {
+		if (loglevel == LOG_DEBUG)
+			syslog(LOG_DEBUG, "Same message as last time, time %lu, skipping ...", info->timestamp);
+		goto done;
+	}
+	strcpy(old_msg, msg);
+
+	if (loglevel == LOG_DEBUG) {
+		syslog(LOG_DEBUG, "Event: %s %s", info->name, con_actions[info->connection]);
+		syslog(LOG_DEBUG, "Time: %lu", info->timestamp);
+		if (info->crtc == 0) {
+			syslog(LOG_DEBUG, "Size: %lumm x %lumm", info->mm_width, info->mm_height);
+		} else {
+			XRRCrtcInfo *crtc;
+
+			syslog(LOG_DEBUG, "CRTC: %lu", info->crtc);
+
+			crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
+			if (crtc) {
+				syslog(LOG_DEBUG, "Size: %dx%d", crtc->width, crtc->height);
+				XRRFreeCrtcInfo(crtc);
+			}
+		}
+	}
+
+	syslog(LOG_DEBUG, "Calling %s ...", cmd);
+	if (!fork()) {
+		char *args[] = {
+			cmd,
+			"display",
+			info->name,
+			con_actions[info->connection],
+			NULL,
+		};
+
+		setsid();
+		if (dpy)
+			close(ConnectionNumber(dpy));
+
+		execv(args[0], args);
+		syslog(LOG_ERR, "Failed calling %s: %s", cmd, strerror(errno));
+		exit(0);
+	}
+
+done:
+	XRRFreeOutputInfo(info);
+	XRRFreeScreenResources(resources);
+}
+
 static int usage(int status)
 {
-	printf("Usage: %s [OPTIONS] /path/to/script [optional script args]\n\n"
+	printf("Usage: %s [OPTIONS] script\n\n"
 	       "Options:\n"
 	       "  -h        Print this help text and exit\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
@@ -88,9 +160,7 @@ int main(int argc, char *argv[])
 	int c, log_opts = LOG_CONS | LOG_PID;
 	XEvent ev;
 	Display *dpy;
-	int background = 1, verbose = 0;
-	int logcons = 0, loglevel = LOG_NOTICE;
-	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
+	int background = 1, logcons = 0;
 	uid_t uid;
 
 	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
@@ -147,64 +217,8 @@ int main(int argc, char *argv[])
 	XSetIOErrorHandler((XIOErrorHandler)error_handler);
 
 	while (1) {
-		if (!XNextEvent(dpy, &ev)) {
-			XRROutputInfo *info;
-			XRRScreenResources *resources;
-
-			resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
-			if (!resources) {
-				syslog(LOG_ERR, "Could not get screen resources");
-				continue;
-			}
-
-			info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
-			if (!info) {
-				XRRFreeScreenResources(resources);
-				syslog(LOG_ERR, "Could not get output info");
-				continue;
-			}
-
-			/* Check for duplicate plug events */
-			snprintf(msg, sizeof(msg), "%s %s", info->name, con_actions[info->connection]);
-			if (!strcmp(msg, old_msg)) {
-				if (verbose)
-					syslog(LOG_DEBUG, "Same message as last time, time %lu, skipping ...", info->timestamp);
-				XRRFreeScreenResources(resources);
-				XRRFreeOutputInfo(info);
-				continue;
-			}
-			strcpy(old_msg, msg);
-
-			if (verbose) {
-				syslog(LOG_DEBUG, "Event: %s %s", info->name, con_actions[info->connection]);
-				syslog(LOG_DEBUG, "Time: %lu", info->timestamp);
-				if (info->crtc == 0) {
-					syslog(LOG_DEBUG, "Size: %lumm x %lumm", info->mm_width, info->mm_height);
-				} else {
-					syslog(LOG_DEBUG, "CRTC: %lu", info->crtc);
-					XRRCrtcInfo *crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
-
-					if (crtc != NULL) {
-						syslog(LOG_DEBUG, "Size: %dx%d", crtc->width, crtc->height);
-						XRRFreeCrtcInfo(crtc);
-					}
-				}
-			}
-
-			XRRFreeScreenResources(resources);
-			XRRFreeOutputInfo(info);
-
-			if (fork() == 0) {
-				if (dpy)
-					close(ConnectionNumber(dpy));
-				setsid();
-				setenv("XPLUG_EVENT", msg, False);
-				XRRFreeScreenResources(resources);
-				XRRFreeOutputInfo(info);
-				execvp(argv[optind], &(argv[optind]));
-				exit(0);	/* We only get here if execvp() fails */
-			}
-		}
+		if (!XNextEvent(dpy, &ev))
+			handle_event(dpy, OCNE(&ev), argv[optind]);
 	}
 
 	return 0;
