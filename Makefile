@@ -2,7 +2,7 @@
 .PHONY: all options clean install uninstall dist
 
 #VERSION         := $(shell git tag -l | tail -1)
-VERSION         := 0.6-dev
+VERSION         := 1.0
 EXEC            := xplugd
 OBJS            := $(EXEC).o
 MAN             := $(EXEC).1
@@ -49,6 +49,6 @@ distclean: clean
 
 dist: 
 	@echo "Building xz tarball of $(PKG) in parent dir ..."
-	@git archive v$(VERSION) | xz > $(ARCHIVE)
+	@git archive --prefix=$(PKG)/ v$(VERSION) | xz > $(ARCHIVE)
 	@md5sum $(ARCHIVE) | tee $(ARCHIVE).md5
 	@mv -i $(ARCHIVE)* ../
