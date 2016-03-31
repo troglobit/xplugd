@@ -1,7 +1,7 @@
 xplugd - monitor plug/unplug helper
 ===================================
 
-`xplugd` is a simple daemon that detects when amonitor is plugged in or
+`xplugd` is a simple daemon that detects when a monitor is plugged in or
 is unplugged.  It is very useful in combination with lightweight setups,
 e.g. when running a simple X window manager like [Awesome][1].
 
@@ -9,16 +9,37 @@ e.g. when running a simple X window manager like [Awesome][1].
 Usage
 -----
 
-    xplugd [option] /path/to/script [optional script args]
+Program usage:
 
+    xplugd [option] /path/to/script
+    
+    -h        Show help text and exit
+    -l LEVEL  Set log level: none, err, info, notice*, debug
+    -n        Run in foreground, do not fork to background
+    -v        Show version info and exit
 
-Options
--------
+The script is called with the following arguments, prepared for future
+addition of support for input devices as well as the current support for
+output devices:
 
-    -h  Show help and exit
-    -n  Do not fork to background
-    -v  Verbose output, useful while debugging
-    -V  Show version info and exit
+    sample.script TYPE DEVICE STATUS [Optional Description]
+                   |    |      |
+                   |    |      `---- connected or disconnected
+                   |    `----------- HDMI3, LVDS1, VGA1, etc.
+                   `---------------- keyboard, pointer, display
+
+Example how a script is called, notice the last argument "LG Display"
+may not be included (reserved for future input device support):
+
+    sample.script display HDMI3 disconnected
+
+or, in the future:
+
+    sample.script keyboard 3 connected "Topre Corporation Realforce 87"
+
+Here keyboard, or pointer, will always be the slave keyboard and pointer
+and status encoding will be `XIStatusEnabled` and `XIStatusDisabled` for
+connected and disconnected, respectively.
 
 
 Example
@@ -28,27 +49,23 @@ Example script
 
 ```shell
     #!/bin/sh
-    # If not DOCK'ed output or LAPTOP, then it's likely VGA or Display Port
-    # used for presenation.  We assume the primary desktop screen (HDMI3) is
-    # placed left of the internal laptop screen, while during presentations
-    # the projector is on our right and the laptop screen is the primary.
-    
     LAPTOP=LVDS1
     DOCK=HDMI3
     DESKPOS=--left-of
     PRESPOS=--right-of
     
-    set ${XPLUG_EVENT}
+    # Script only supports disply hotplugging atm.
+    if [ "$1" = "display" ] || exit 0
     
-    if [ "$2" = "disconnected" ]; then
-        xrandr --output $1 --off
+    if [ "$3" = "disconnected" ]; then
+        xrandr --output $2 --off
         exit 0
     fi
     
-    if [ "$1" = "${DOCK}" ]; then
-        xrandr --output $1 --auto --primary ${DESKPOS} ${LAPTOP}
+    if [ "$2" = "${DOCK}" ]; then
+        xrandr --output $2 --auto --primary ${DESKPOS} ${LAPTOP}
     elif  [ "$1" != "${LAPTOP}" ]; then
-        xrandr --output $1 --auto ${PRESPOS} ${LAPTOP} --primary
+        xrandr --output $2 --auto ${PRESPOS} ${LAPTOP} --primary
     else
         xrandr --auto
     fi
