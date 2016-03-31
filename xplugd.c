@@ -40,6 +40,16 @@
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 extern char *__progname;
 
+static int loglvl(char *level)
+{
+	for (int i = 0; prioritynames[i].c_name; i++) {
+		if (!strcmp(prioritynames[i].c_name, level))
+			return prioritynames[i].c_val;
+	}
+
+	return atoi(level);
+}
+
 static int error_handler(void)
 {
 	exit(1);
@@ -56,10 +66,10 @@ static int usage(int status)
 {
 	printf("Usage: %s [OPTIONS] /path/to/script [optional script args]\n\n"
 	       "Options:\n"
-	       "   -h  Print this help text and exit\n"
-	       "   -n  Run in foreground, do not fork to background\n"
-	       "   -v  Enable verbose debug output to stdout\n"
-	       "   -V  Print version information and exit\n\n"
+	       "  -h        Print this help text and exit\n"
+	       "  -n        Run in foreground, do not fork to background\n"
+	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
+	       "  -v        Show program version\n\n"
 	       "Copyright (C) 2012-2015 Stefan Bolte\n"
 	       "Copyright (C)      2016 Joachim Nilsson\n\n"
 	       "Bug report address: https://github.com/troglobit/xplugd/issues\n\n", __progname);
@@ -74,29 +84,28 @@ static int version(void)
 
 int main(int argc, char *argv[])
 {
-	int c;
+	int c, log_opts = LOG_CONS | LOG_PID;
 	XEvent ev;
 	Display *dpy;
-	int daemonize = 1, verbose = 0;
+	int daemonize = 1, verbose = 0, loglevel = LOG_NOTICE;
 	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
 	uid_t uid;
 
-	while ((c = getopt(argc, argv, "hnvV")) != EOF) {
+	while ((c = getopt(argc, argv, "hl:nv")) != EOF) {
 		switch (c) {
+		case 'h':
+			return usage(0);
 
-		case 'V':
-			return version();
+		case 'l':
+			loglevel = loglvl(optarg);
+			break;
 
 		case 'n':
 			daemonize = 0;
 			break;
 
 		case 'v':
-			verbose++;
-			break;
-
-		case 'h':
-			return usage(0);
+			return version();
 
 		default:
 			return usage(1);
@@ -122,6 +131,10 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+
+	openlog(NULL, log_opts, LOG_USER);
+	setlogmask(LOG_UPTO(loglevel));
+
 	signal(SIGCHLD, catch_child);
 
 	XRRSelectInput(dpy, DefaultRootWindow(dpy), RROutputChangeNotifyMask);
