@@ -202,8 +202,12 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (background)
-		daemon(0, 0);
+	if (background) {
+		if (daemon(0, 0)) {
+			fprintf(stderr, "Failed backgrounding %s: %s", __progname, strerror(errno));
+			exit(1);
+		}
+	}
 	if (logcons > 0)
 		log_opts |= LOG_PERROR;
 
