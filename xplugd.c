@@ -20,7 +20,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <errno.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -68,19 +70,18 @@ static int version(void)
 	return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
+	int c;
 	XEvent ev;
 	Display *dpy;
-	int daemonize = 1, args = 1, verbose = 0;
+	int daemonize = 1, verbose = 0;
 	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
 	uid_t uid;
 
-	if (argc < 2)
-		usage(1);
+	while ((c = getopt(argc, argv, "hnvV")) != EOF) {
+		switch (c) {
 
-	for (args = 1; args < argc && *(argv[args]) == '-'; args++) {
-		switch (argv[args][1]) {
 		case 'V':
 			return version();
 
@@ -100,7 +101,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (argv[args] == NULL)
+	if (optind >= argc)
 		return usage(1);
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
 				setenv("XPLUG_EVENT", msg, False);
 				XRRFreeScreenResources(resources);
 				XRRFreeOutputInfo(info);
-				execvp(argv[args], &(argv[args]));
+				execvp(argv[optind], &(argv[optind]));
 				exit(0);	/* We only get here if execvp() fails */
 			}
 		}
