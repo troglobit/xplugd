@@ -9,17 +9,18 @@ DOCK=HDMI3
 DESKPOS=--left-of
 PRESPOS=--right-of
 
-set ${XPLUG_EVENT}
+# Script only supports disply hotplugging atm.
+[ "$1" = "display" ] || exit 0
 
-if [ "$2" = "disconnected" ]; then
-    xrandr --output $1 --off
+if [ "$3" = "disconnected" ]; then
+       xrandr --output $2 --off
     exit 0
 fi
 
-if [ "$1" = "${DOCK}" ]; then
-    xrandr --output $1 --auto --primary ${DESKPOS} ${LAPTOP}
-elif  [ "$1" != "${LAPTOP}" ]; then
-    xrandr --output $1 --auto ${PRESPOS} ${LAPTOP} --primary
+if [ "$2" = "${DOCK}" ]; then
+    xrandr --output $2 --auto --primary ${DESKPOS} ${LAPTOP}
+elif  [ "$2" != "${LAPTOP}" ]; then
+    xrandr --output $2 --auto ${PRESPOS} ${LAPTOP} --primary
 else
     xrandr --auto
 fi
