@@ -11,18 +11,19 @@ Usage
 
 Program usage:
 
-    xplugd [option] /path/to/script
+    xplugd [option] script
     
     -h        Show help text and exit
     -l LEVEL  Set log level: none, err, info, notice*, debug
     -n        Run in foreground, do not fork to background
+    -s        Use syslog, even if running in foreground, default w/o -n
     -v        Show version info and exit
 
 The script is called with the following arguments, prepared for future
 addition of support for input devices as well as the current support for
 output devices:
 
-    sample.script TYPE DEVICE STATUS [Optional Description]
+    sample.script TYPE DEVICE STATUS ["Optional Description"]
                    |    |      |
                    |    |      `---- connected or disconnected
                    |    `----------- HDMI3, LVDS1, VGA1, etc.
@@ -33,13 +34,13 @@ may not be included (reserved for future input device support):
 
     sample.script display HDMI3 disconnected
 
-or, in the future:
+or, in future version of `xplugd` with support for xinput(1):
 
     sample.script keyboard 3 connected "Topre Corporation Realforce 87"
 
-Here keyboard, or pointer, will always be the slave keyboard and pointer
-and status encoding will be `XIStatusEnabled` and `XIStatusDisabled` for
-connected and disconnected, respectively.
+Here keyboard or pointer will always be the slave keyboard and pointer,
+and the status encoding for `XIStatusEnabled` and `XIStatusDisabled`
+will be connected and disconnected, respectively.
 
 
 Example
@@ -55,7 +56,7 @@ Example script
     PRESPOS=--right-of
     
     # Script only supports disply hotplugging atm.
-    if [ "$1" = "display" ] || exit 0
+    [ "$1" = "display" ] || exit 0
     
     if [ "$3" = "disconnected" ]; then
         xrandr --output $2 --off
