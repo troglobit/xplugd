@@ -67,8 +67,9 @@ static int usage(int status)
 	printf("Usage: %s [OPTIONS] /path/to/script [optional script args]\n\n"
 	       "Options:\n"
 	       "  -h        Print this help text and exit\n"
-	       "  -n        Run in foreground, do not fork to background\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
+	       "  -n        Run in foreground, do not fork to background\n"
+	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n\n"
 	       "Copyright (C) 2012-2015 Stefan Bolte\n"
 	       "Copyright (C)      2016 Joachim Nilsson\n\n"
@@ -87,11 +88,12 @@ int main(int argc, char *argv[])
 	int c, log_opts = LOG_CONS | LOG_PID;
 	XEvent ev;
 	Display *dpy;
-	int daemonize = 1, verbose = 0, loglevel = LOG_NOTICE;
+	int daemonize = 1, verbose = 0;
+	int logcons = 0, loglevel = LOG_NOTICE;
 	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
 	uid_t uid;
 
-	while ((c = getopt(argc, argv, "hl:nv")) != EOF) {
+	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
 		switch (c) {
 		case 'h':
 			return usage(0);
@@ -102,6 +104,11 @@ int main(int argc, char *argv[])
 
 		case 'n':
 			daemonize = 0;
+			logcons++;
+			break;
+
+		case 's':
+			logcons--;
 			break;
 
 		case 'v':
@@ -131,6 +138,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+	if (logcons > 0)
+		log_opts |= LOG_PERROR;
 
 	openlog(NULL, log_opts, LOG_USER);
 	setlogmask(LOG_UPTO(loglevel));
