@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	int c, log_opts = LOG_CONS | LOG_PID;
 	XEvent ev;
 	Display *dpy;
-	int daemonize = 1, verbose = 0;
+	int background = 1, verbose = 0;
 	int logcons = 0, loglevel = LOG_NOTICE;
 	char msg[MSG_LEN], old_msg[MSG_LEN] = "";
 	uid_t uid;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'n':
-			daemonize = 0;
+			background = 0;
 			logcons++;
 			break;
 
@@ -132,12 +132,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (daemonize) {
-		if (daemon(0, 0)) {
-			fprintf(stderr, "Failed daemonizing: %s\n", strerror(errno));
-			exit(1);
-		}
-	}
+	if (background)
+		daemon(0, 0);
 	if (logcons > 0)
 		log_opts |= LOG_PERROR;
 
