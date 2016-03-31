@@ -11,7 +11,8 @@
 .Nd monitor plug/unplug helper
 .Sh SYNOPSIS
 .Nm
-.Op Fl hnvV
+.Op Fl hnv
+.Op Fl l Ar LEVEL
 .Ar SCRIPT
 .Sh DESCRIPTION
 .Nm
@@ -22,13 +23,18 @@ background and exits when the X server exits.
 .Pp
 .Bl -tag -width Ds
 .It Fl h
-.RS 4
 Print help and exit
 .It Fl n
 Run in foreground, do not detach from calling terminal and fork to background
+.It Fl l Ar LVL
+Set log level for syslog messages, where
+.Ar LVL
+is one of: none, err, info,
+.Ar notice ,
+debug.  Use
+.Fl l Ar debug
+to enable debug messages
 .It Fl v
-Enable verbose messages.  Useful for debugging in the foreground
-.It Fl V
 Show version information and exit
 .El
 .Pp
