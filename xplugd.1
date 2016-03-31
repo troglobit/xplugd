@@ -24,8 +24,6 @@ background and exits when the X server exits.
 .Bl -tag -width Ds
 .It Fl h
 Print help and exit
-.It Fl n
-Run in foreground, do not detach from calling terminal and fork to background
 .It Fl l Ar LVL
 Set log level for syslog messages, where
 .Ar LVL
@@ -34,39 +32,57 @@ is one of: none, err, info,
 debug.  Use
 .Fl l Ar debug
 to enable debug messages
+.It Fl n
+Run in foreground, do not detach from calling terminal and fork to background
+.It Fl s
+Use syslog, even if running in foreground, default w/o
+.Fl n
 .It Fl v
 Show version information and exit
 .El
 .Pp
-The environment variable
-.Ar XPLUG_EVENT
-passed to the script has the following syntax:
-.Bd -literal -offset indent
-DISPLAYNAME [connected|disconnected|unknown]
-.Ed
-.Pp
-E.g.
-.Bd -literal -offset indent
-HDMI3 connected
-.Ed
+The
+.Ar SCRIPT
+is called with the following arguments:
+.Bl -tag -width Ds -offset indent
+.It $1 = Ar TYPE
+One of
+.Ar display | keyboard | pointer
+.It $2 = Ar DEVICE
+Usually HDMI3, LVDS1, VGA1, or an
+.Xr xinput 1
+device number.
+.It $3 = Ar STATUS
+One of
+.Ar connected | disconnected | unknown
+.It $4 = Ar DESCRIPTION
+An optional description enclosed in double qoutes, only used for
+.Xr xinput 1
+devices, like the keyboard manufacturer and model name.
+.El
 .Sh EXAMPLE
 Here is an example of how to use
 .Nm :
 .Bd -literal -offset indent
-xplugd /path/to/my-script.sh
+xplugd my-script.sh
 .Ed
 .Pp
 Where
-.Ar /path/to/my-script.sh
+.Ar my-script.sh
 could look something like this:
 .Bd -literal -offset indent
 #!/bin/sh
 
-case "$XPLUG_EVENT" in
-  "DVI-0 connected")
+type=$1
+device=$2
+status=$3
+desc=$4
+
+case "$device $status" in
+  DVI-0 connected)
 	xrandr --output DVI-0 --auto --right-of LVDS
 	;;
-  "VGA-0 connected")
+  VGA-0 connected)
 	xrandr --output VGA-0 --auto --left-of LVDS
 	;;
 esac
@@ -74,7 +90,7 @@ esac
 .Sh AUTHORS
 Stefan Bolte is the original author of
 .Nm
-under its former guise as
+under its former guise of
 .Nm srandrd ,
 .Aq http://bitbucket.org/portix/srandrd .
 In 2016 An Joachim Nilsson forked and renamed the project for further
