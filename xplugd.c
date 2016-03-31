@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
+#define SYSLOG_NAMES
+#include <syslog.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <X11/Xlib.h>
@@ -133,14 +135,14 @@ int main(int argc, char *argv[])
 
 			resources = XRRGetScreenResources(OCNE(&ev)->display, OCNE(&ev)->window);
 			if (!resources) {
-				fprintf(stderr, "Could not get screen resources\n");
+				syslog(LOG_ERR, "Could not get screen resources");
 				continue;
 			}
 
 			info = XRRGetOutputInfo(OCNE(&ev)->display, resources, OCNE(&ev)->output);
 			if (!info) {
 				XRRFreeScreenResources(resources);
-				fprintf(stderr, "Could not get output info\n");
+				syslog(LOG_ERR, "Could not get output info");
 				continue;
 			}
 
@@ -148,7 +150,7 @@ int main(int argc, char *argv[])
 			snprintf(msg, sizeof(msg), "%s %s", info->name, con_actions[info->connection]);
 			if (!strcmp(msg, old_msg)) {
 				if (verbose)
-					printf("Same message as last time, time %lu, skipping ...\n", info->timestamp);
+					syslog(LOG_DEBUG, "Same message as last time, time %lu, skipping ...", info->timestamp);
 				XRRFreeScreenResources(resources);
 				XRRFreeOutputInfo(info);
 				continue;
@@ -156,16 +158,16 @@ int main(int argc, char *argv[])
 			strcpy(old_msg, msg);
 
 			if (verbose) {
-				printf("Event: %s %s\n", info->name, con_actions[info->connection]);
-				printf("Time: %lu\n", info->timestamp);
+				syslog(LOG_DEBUG, "Event: %s %s", info->name, con_actions[info->connection]);
+				syslog(LOG_DEBUG, "Time: %lu", info->timestamp);
 				if (info->crtc == 0) {
-					printf("Size: %lumm x %lumm\n", info->mm_width, info->mm_height);
+					syslog(LOG_DEBUG, "Size: %lumm x %lumm", info->mm_width, info->mm_height);
 				} else {
-					printf("CRTC: %lu\n", info->crtc);
+					syslog(LOG_DEBUG, "CRTC: %lu", info->crtc);
 					XRRCrtcInfo *crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
 
 					if (crtc != NULL) {
-						printf("Size: %dx%d\n", crtc->width, crtc->height);
+						syslog(LOG_DEBUG, "Size: %dx%d", crtc->width, crtc->height);
 						XRRFreeCrtcInfo(crtc);
 					}
 				}
