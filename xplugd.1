@@ -8,7 +8,7 @@
 .Os
 .Sh NAME
 .Nm xplugd
-.Nd monitor plug/unplug helper
+.Nd an X input/output plug in/out helper
 .Sh SYNOPSIS
 .Nm
 .Op Fl hnv
@@ -16,9 +16,18 @@
 .Ar SCRIPT
 .Sh DESCRIPTION
 .Nm
-is a tool that executes a script on xrandr output change events, i.e.,
-if a monitor is plugged or unplugged.  By default xplugd forks to the
-background and exits when the X server exits.
+is a daemon that executes a script on X input and RandR changes, i.e.,
+if a keyboard, mouse or monitor is plugged in or unplugged.  Useful if
+you want to run
+.Xr xrandr 1 ,
+.Xr xinput 1 ,
+or
+.Xr setxkbmap 1
+when docking or undocking a laptop.
+.Pp
+By default
+.Nm
+forks to the background and exits when the X server exits.
 .Sh OPTIONS
 .Pp
 .Bl -tag -width Ds
@@ -78,21 +87,30 @@ device=$2
 status=$3
 desc=$4
 
-case "$device $status" in
-  DVI-0 connected)
-	xrandr --output DVI-0 --auto --right-of LVDS
-	;;
-  VGA-0 connected)
-	xrandr --output VGA-0 --auto --left-of LVDS
-	;;
+case "$type,$device,$status,$desc" in
+  display,DVI-0,connected,*)
+        xrandr --output DVI-0 --auto --right-of LVDS
+        ;;
+  display,VGA-0,connected,*)
+        xrandr --output VGA-0 --auto --left-of LVDS
+        ;;
+  pointer,*,connected,"SynPS/2 Synaptics TouchPad")
+        xinput set-prop $device 'Synaptics Off' 1
+        ;;
+  keyboard,*connected,*)
+        setxkbmap -option ctrl:nocaps
+        ;;
 esac
 .Ed
+.Sh SEE ALSO
+.Aq http://bitbucket.org/portix/srandrd
+.Aq https://bitbucket.org/andrew_shadura/inputplug
+.Aq https://github.com/troglobit/xplugd
 .Sh AUTHORS
-Stefan Bolte is the original author of
 .Nm
-under its former guise of
-.Nm srandrd ,
-.Aq http://bitbucket.org/portix/srandrd .
-In 2016 An Joachim Nilsson forked and renamed the project for further
-development at
-.Aq https://github.com/troglobit/xplugd .
+was created by Joachim Nilsson in 2016 for use with window managers like
+.Xr awesome 1 .
+It would however not exist if not for the hard work of Stefan Bolte with
+.Nm srandrd
+and Andrew Shadura with
+.Nm inputplug .
