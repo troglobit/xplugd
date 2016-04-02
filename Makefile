@@ -2,7 +2,7 @@
 .PHONY: all options clean install uninstall dist
 
 #VERSION         := $(shell git tag -l | tail -1)
-VERSION         := 1.0
+VERSION         := 1.1-dev
 EXEC            := xplugd
 OBJS            := $(EXEC).o
 MAN             := $(EXEC).1
@@ -19,7 +19,7 @@ CFLAGS          := -O2 -W -Wall -Wextra -pedantic -std=c99
 CPPFLAGS        += -D_DEFAULT_SOURCE
 CPPFLAGS        += -DVERSION=\"$(VERSION)\"
 
-LDLIBS          := -lX11 -lXrandr
+LDLIBS          := -lX11 -lXrandr -lXi
 
 all: $(EXEC)
 

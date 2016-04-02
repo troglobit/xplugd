@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -32,6 +33,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <X11/Xlib.h>
+#include <X11/extensions/XInput.h>
+#include <X11/extensions/XInput2.h>
 #include <X11/extensions/Xrandr.h>
 
 #define OCNE(X) ((XRROutputChangeNotifyEvent*)X)
@@ -40,6 +43,52 @@
 static int   loglevel = LOG_NOTICE;
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 extern char *__progname;
+static char *cmd;
+
+struct pair {
+    int key;
+    char * value;
+};
+
+#define T(x) {x, #x}
+#define T_END {0, NULL}
+
+
+static const struct pair *map(int key, const struct pair *table, bool strict)
+{
+    if (!table)
+	    return NULL;
+
+    while (table->value) {
+	    if ((!strict && (table->key & key)) || (table->key == key))
+		    return table;
+
+	    table++;
+    }
+
+    return NULL;
+}
+
+const struct pair device_types[] = {
+    T(XIMasterPointer),
+    T(XIMasterKeyboard),
+    { XISlavePointer,  "pointer" },
+    { XISlaveKeyboard, "keyboard" },
+    T(XIFloatingSlave),
+    T_END
+};
+
+const struct pair changes[] = {
+    T(XIMasterAdded),
+    T(XIMasterRemoved),
+    T(XISlaveAdded),
+    T(XISlaveRemoved),
+    T(XISlaveAttached),
+    T(XISlaveDetached),
+    { XIDeviceEnabled,  "connected"    },
+    { XIDeviceDisabled, "disconnected" },
+    T_END
+};
 
 static int loglvl(char *level)
 {
@@ -63,7 +112,94 @@ static void catch_child(int sig)
 		;
 }
 
-static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev, char *cmd)
+#define STRINGIFY(x) #x
+#define EXPAND_STRINGIFY(x) STRINGIFY(x)
+#define UINT_MAX_STRING EXPAND_STRINGIFY(UINT_MAX)
+
+static int handle_device(int id, int type, int flags, char *name)
+{
+	const struct pair *use = map(type, device_types, true);
+	const struct pair *change = map(flags, changes, false);
+
+	if (change) {
+		char deviceid[strlen(UINT_MAX_STRING) + 1];
+		char *args[] = {
+			cmd,
+			use ? use->value : "",
+			deviceid,
+			change->value,
+			name ? name : "",
+			NULL
+		};
+
+		if (type != XISlavePointer && type != XISlaveKeyboard) {
+			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name);
+			return 0;
+		}
+		if (flags != XIDeviceEnabled && flags != XIDeviceDisabled) {
+			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name);
+			return 0;
+		}
+
+		snprintf(deviceid, sizeof(deviceid), "%d", id);
+		syslog(LOG_DEBUG, "Calling %s %s %s %s %s", cmd, use->value, deviceid, change->value, name ? name : "");
+		execv(args[0], args);
+
+		return change->key;
+	}
+
+	return -1;
+}
+
+static char *get_device_name(Display *display, int deviceid)
+{
+        XIDeviceInfo *info;
+        int i, num_devices;
+        char *name = NULL;
+
+        info = XIQueryDevice(display, XIAllDevices, &num_devices);
+	if (!info)
+		return NULL;
+
+        for (i = 0; i < num_devices; i++) {
+		if (info[i].deviceid == deviceid) {
+			name = strdup(info[i].name);
+			break;
+		}
+        }
+        XIFreeDeviceInfo(info);
+
+        return name;
+}
+
+static void parse_event(XIHierarchyEvent *event)
+{
+	int i;
+
+	for (i = 0; i < event->num_info; i++) {
+		int flags = event->info[i].flags;
+		int j = 16;
+
+		while (flags && j) {
+			int ret = 0;
+			char *name;
+
+			name = get_device_name(event->display, event->info[i].deviceid);
+			if (!name)
+				break;
+			
+			ret = handle_device(event->info[i].deviceid, event->info[i].use, flags, name);
+			free(name);
+			if (ret == -1)
+				break;
+
+			j--;
+			flags -= ret;
+		}
+	}
+}
+
+static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 {
 	char msg[MSG_LEN];
 	static char old_msg[MSG_LEN] = "";
@@ -124,6 +260,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev, char *cmd
 		if (dpy)
 			close(ConnectionNumber(dpy));
 
+		syslog(LOG_DEBUG, "Calling %s %s %s %s %s", cmd, "display", info->name, con_actions[info->connection], "");
 		execv(args[0], args);
 		syslog(LOG_ERR, "Failed calling %s: %s", cmd, strerror(errno));
 		exit(0);
@@ -160,6 +297,8 @@ int main(int argc, char *argv[])
 	int c, log_opts = LOG_CONS | LOG_PID;
 	XEvent ev;
 	Display *dpy;
+	XIEventMask mask;
+	int xi_opcode, event, error;
 	int background = 1, logcons = 0;
 	uid_t uid;
 
@@ -191,6 +330,7 @@ int main(int argc, char *argv[])
 
 	if (optind >= argc)
 		return usage(1);
+	cmd = argv[optind];
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", __progname);
@@ -199,6 +339,11 @@ int main(int argc, char *argv[])
 
 	if ((dpy = XOpenDisplay(NULL)) == NULL) {
 		fprintf(stderr, "Cannot open display\n");
+		exit(1);
+	}
+
+	if (!XQueryExtension(dpy, "XInputExtension", &xi_opcode, &event, &error)) {
+		fprintf(stderr, "X Input extension not available\n");
 		exit(1);
 	}
 
@@ -216,13 +361,31 @@ int main(int argc, char *argv[])
 
 	signal(SIGCHLD, catch_child);
 
+	mask.deviceid = XIAllDevices;
+	mask.mask_len = XIMaskLen(XI_LASTEVENT);
+	mask.mask = calloc(mask.mask_len, sizeof(char));
+	XISetMask(mask.mask, XI_HierarchyChanged);
+	XISelectEvents(dpy, DefaultRootWindow(dpy), &mask, 1);
 	XRRSelectInput(dpy, DefaultRootWindow(dpy), RROutputChangeNotifyMask);
 	XSync(dpy, False);
 	XSetIOErrorHandler((XIOErrorHandler)error_handler);
 
 	while (1) {
-		if (!XNextEvent(dpy, &ev))
-			handle_event(dpy, OCNE(&ev), argv[optind]);
+		if (!XNextEvent(dpy, &ev)) {
+			XGenericEventCookie *cookie = (XGenericEventCookie*)&ev.xcookie;
+
+			if (XGetEventData(dpy, cookie)) {
+				if (cookie->type == GenericEvent &&
+				    cookie->extension == xi_opcode &&
+				    cookie->evtype == XI_HierarchyChanged)
+					parse_event(cookie->data);
+
+				XFreeEventData(dpy, cookie);
+				continue;
+			}
+
+			handle_event(dpy, OCNE(&ev));
+		}
 	}
 
 	return 0;
