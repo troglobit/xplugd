@@ -1,9 +1,10 @@
-xplugd - monitor plug/unplug helper
-===================================
+xplugd - monitor/keyboard/mouse plug/unplug helper
+==================================================
 
-`xplugd` is a simple daemon that detects when a monitor is plugged in or
-is unplugged.  It is very useful in combination with lightweight setups,
-e.g. when running a simple X window manager like [Awesome][1].
+`xplugd` is a simple daemon that detects when a monitor, keyboard or a
+pointer (mouse) is plugged in or is unplugged.  It is very useful in
+combination with lightweight setups, e.g. when running a simple X window
+manager like [Awesome][1].
 
 
 Usage
@@ -19,9 +20,7 @@ Program usage:
     -s        Use syslog, even if running in foreground, default w/o -n
     -v        Show version info and exit
 
-The script is called with the following arguments, prepared for future
-addition of support for input devices as well as the current support for
-output devices:
+The script is called with the following arguments:
 
     sample.script TYPE DEVICE STATUS ["Optional Description"]
                    |    |      |
@@ -30,17 +29,17 @@ output devices:
                    `---------------- keyboard, pointer, display
 
 Example how a script is called, notice the last argument "LG Display"
-may not be included (reserved for future input device support):
+may not be included (reserved for input devices):
 
     sample.script display HDMI3 disconnected
 
-or, in future version of `xplugd` with support for xinput(1):
+or
 
     sample.script keyboard 3 connected "Topre Corporation Realforce 87"
 
-Here keyboard or pointer will always be the slave keyboard and pointer,
-and the status encoding for `XIStatusEnabled` and `XIStatusDisabled`
-will be connected and disconnected, respectively.
+The keyboard or pointer is always the X slave keyboard or pointer, and
+the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is
+forwarded to the script as connected and disconnected, respectively.
 
 
 Example

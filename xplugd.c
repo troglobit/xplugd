@@ -1,4 +1,4 @@
-/* xplugd - monitor plug/unplug helper
+/* xplugd - monitor/keyboard/mouse plug/unplug helper
  *
  * Copyright (C) 2012-2015  Stefan Bolte <portix@gmx.net>
  * Copyright (C) 2013-2015  Andrew Shadura <andrewsh@debian.org>
