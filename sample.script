@@ -9,8 +9,17 @@ DOCK=HDMI3
 DESKPOS=--left-of
 PRESPOS=--right-of
 
-# Script only supports disply hotplugging atm.
-[ "$1" = "display" ] || exit 0
+if [ "$1" != "display" ]; then
+    case "$1,$3,$4" in
+        pointer,conntected,"SynPS/2 Synaptics TouchPad")
+            xinput set-prop $2 'Synaptics Off' 1
+            ;;
+        keyboard,connected,*)
+            setxkbmap -option ctrl:nocaps
+            ;;
+    esac
+    exit 0
+fi
 
 if [ "$3" = "disconnected" ]; then
        xrandr --output $2 --off
