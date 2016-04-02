@@ -76,10 +76,11 @@ Example script
 Origin & References
 -------------------
 
-`xplugd` was originally written by Stefan Bolte, who still maintains it
-as `srandrd` at [BitBucket][2].  In 2016 Joachim Nilsson forked it as
-`xplugd` at [GitHub][3] for further development.
+[`xplugd`][2] is composed from pieces of Stefan Bolte's [`srandrd`][3]
+and Andrew Shadura's [`inputplug`][4].  Please report bugs and problems
+to the `xplugd` project.
 
 [1]: https://awesome.naquadah.org
-[2]: http://bitbucket.org/portix/srandrd
-[3]: https://github.com/troglobit/xplugd
+[2]: https://github.com/troglobit/xplugd
+[3]: https://bitbucket.org/portix/srandrd
+[4]: https://bitbucket.org/andrew_shadura/inputplug
