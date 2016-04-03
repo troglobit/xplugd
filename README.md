@@ -1,10 +1,11 @@
-xplugd - monitor/keyboard/mouse plug/unplug helper
-==================================================
+xplugd - an X input/output plug in/out helper
+=============================================
 
-`xplugd` is a simple daemon that detects when a monitor, keyboard or a
-pointer (mouse) is plugged in or is unplugged.  It is very useful in
-combination with lightweight setups, e.g. when running a simple X window
-manager like [Awesome][1].
+`xplugd` is a daemon that executes a script on X input and RandR
+changes, i.e., when a monitor, keyboard or a mouse is plugged in or
+unplugged.  Useful in combination with lightweight setups, e.g. when
+running a simple X window manager like [Awesome][1], to detect when
+docking or undocking a laptop.
 
 
 Usage
