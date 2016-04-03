@@ -2,7 +2,7 @@
 .PHONY: all options clean install uninstall dist
 
 #VERSION         := $(shell git tag -l | tail -1)
-VERSION         := 1.1-dev
+VERSION         := 1.1
 EXEC            := xplugd
 OBJS            := $(EXEC).o exec.o input.o randr.o
 MAN             := $(EXEC).1
