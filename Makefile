@@ -4,7 +4,7 @@
 #VERSION         := $(shell git tag -l | tail -1)
 VERSION         := 1.1-dev
 EXEC            := xplugd
-OBJS            := $(EXEC).o
+OBJS            := $(EXEC).o exec.o input.o randr.o
 MAN             := $(EXEC).1
 PKG             := $(EXEC)-$(VERSION)
 ARCHIVE         := $(PKG).tar.xz
@@ -26,6 +26,8 @@ all: $(EXEC)
 .c.o:
 	@printf "  CC      $@\n"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+$(OBJS): $(EXEC).h Makefile
 
 $(EXEC): $(OBJS)
 	@printf "  LINK    $@\n"
