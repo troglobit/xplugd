@@ -26,24 +26,34 @@ static Display *display = NULL;
 
 static void catch_child(int sig)
 {
+	pid_t pid;
+
 	(void)sig;
-	while (waitpid(-1, NULL, WNOHANG) > 0)
-		;
+	while ((pid = waitpid(-1, NULL, WNOHANG)) > 0)
+		syslog(LOG_DEBUG, "Collected PID %d", pid);
 }
 
 int exec_init(Display *dpy)
 {
+	struct sigaction sa = {
+		.sa_flags = SA_RESTART,
+		.sa_handler = catch_child,
+	};
+
 	display = dpy;
-	signal(SIGCHLD, catch_child);
+	sigaction(SIGCHLD, &sa, NULL);
 
 	return 0;
 }
 
 int exec(char *type, char *device, char *status, char *name)
 {
+	pid_t pid;
+
 	syslog(LOG_DEBUG, "Calling %s %s %s %s %s", cmd, type, device, status, name ? name : "");
 
-	if (!fork()) {
+	pid = fork();
+	if (!pid) {
 		char *args[] = {
 			cmd,
 			type,
@@ -61,6 +71,8 @@ int exec(char *type, char *device, char *status, char *name)
 		syslog(LOG_ERR, "Failed calling %s: %s", cmd, strerror(errno));
 		exit(0);
 	}
+
+	syslog(LOG_DEBUG, "Started %s as PID %d", cmd, pid);
 
 	return 0;
 }
