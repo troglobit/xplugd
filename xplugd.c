@@ -61,7 +61,7 @@ static int usage(int status)
 
 static int version(void)
 {
-	printf("v%s\n", VERSION);
+	printf("v%s\n", PACKAGE_VERSION);
 	return 0;
 }
 

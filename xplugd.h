@@ -25,6 +25,7 @@
 #ifndef XPLUGD_H_
 #define XPLUGD_H_
 
+#include "config.h"
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
