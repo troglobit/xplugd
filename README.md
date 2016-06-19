@@ -82,6 +82,31 @@ Example script
 ```
 
 
+Build & Install
+---------------
+
+To build xplugd you need standard X11, X11 input, and Xrandr development
+files.  On a Debian/Ubuntu system these files can be installed with:
+
+    sudo apt install libx11-dev libxi-dev libxrandr-dev
+
+Then simply run the configure script and make:
+
+    ./configure && make
+
+Unless building from the GIT sources, in which case `./autogen.sh` first
+must be called to create the configure script.  In relased tarballs this
+is not necessary.
+
+To change the default installation prefix from `/usr/local`, use the
+
+    ./configure --prefix=/some/other/path
+
+Followed by
+
+    make all && sudo make install-strip
+
+
 Origin & References
 -------------------
 
