@@ -55,7 +55,7 @@ static int usage(int status)
 	       "  -v        Show program version\n\n"
 	       "Copyright (C) 2012-2015 Stefan Bolte\n"
 	       "Copyright (C)      2016 Joachim Nilsson\n\n"
-	       "Bug report address: https://github.com/troglobit/xplugd/issues\n\n", __progname);
+	       "Bug report address: %s\n\n", __progname, PACKAGE_BUGREPORT);
 	return status;
 }
 
