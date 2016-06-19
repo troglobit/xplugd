@@ -1,5 +1,6 @@
 xplugd - an X input/output plug in/out helper
 =============================================
+[![Travis Status][]][Travis]
 
 `xplugd` is a daemon that executes a script on X input and RandR
 changes, i.e., when a monitor, keyboard or a mouse is plugged in or
@@ -118,3 +119,11 @@ to the `xplugd` project.
 [2]: https://github.com/troglobit/xplugd
 [3]: https://bitbucket.org/portix/srandrd
 [4]: https://bitbucket.org/andrew_shadura/inputplug
+[Travis]:        https://travis-ci.org/troglobit/xplugd
+[Travis Status]: https://travis-ci.org/troglobit/xplugd.png?branch=master
+
+<!--
+  -- Local Variables:
+  -- mode: markdown
+  -- End:
+  -->
