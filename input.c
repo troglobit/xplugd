@@ -81,11 +81,11 @@ static int handle_device(int id, int type, int flags, char *name)
 		char deviceid[strlen(UINT_MAX_STRING) + 1];
 
 		if (type != XISlavePointer && type != XISlaveKeyboard) {
-			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name);
+			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name ? name : "<none>");
 			return 0;
 		}
 		if (flags != XIDeviceEnabled && flags != XIDeviceDisabled) {
-			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name);
+			syslog(LOG_DEBUG, "Skipping dev %d type %s flags %s name %s", id, use ? use->value : "", change->value, name ? name : "<none>");
 			return 0;
 		}
 
@@ -132,9 +132,6 @@ static void handle_event(XIHierarchyEvent *event)
 			char *name;
 
 			name = get_device_name(event->display, event->info[i].deviceid);
-			if (!name)
-				break;
-			
 			ret = handle_device(event->info[i].deviceid, event->info[i].use, flags, name);
 			free(name);
 			if (ret == -1)
