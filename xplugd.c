@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 	if (logcons > 0)
 		log_opts |= LOG_PERROR;
 
-	openlog(NULL, log_opts, LOG_USER);
+	openlog(__progname, log_opts, LOG_USER);
 	setlogmask(LOG_UPTO(loglevel));
 
 	exec_init(dpy);
