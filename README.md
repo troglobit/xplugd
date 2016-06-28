@@ -1,12 +1,12 @@
-xplugd - an X input/output plug in/out helper
-=============================================
+xplugd - X plug daemon
+======================
 [![Travis Status][]][Travis]
 
-`xplugd` is a daemon that executes a script on X input and RandR
-changes, i.e., when a monitor, keyboard or a mouse is plugged in or
+`xplugd` is a UNIX daemon that executes a script on X input and RandR
+changes, i.e., when a, keyboard, mouse. or a monitor is plugged in or
 unplugged.  Useful in combination with lightweight setups, e.g. when
-running a simple X window manager like [Awesome][1], to detect when
-docking or undocking a laptop.
+running an X window manager like [Awesome][1], Fluxbox, or similar to
+detect when docking or undocking a laptop.
 
 
 Usage
