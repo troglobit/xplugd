@@ -24,7 +24,7 @@ Program usage:
 
 The script is called with the following arguments:
 
-    sample.script TYPE DEVICE STATUS ["Optional Description"]
+    xplugd.script TYPE DEVICE STATUS ["Optional Description"]
                    |    |      |
                    |    |      `---- connected or disconnected
                    |    `----------- HDMI3, LVDS1, VGA1, etc.
@@ -33,11 +33,11 @@ The script is called with the following arguments:
 Example how a script is called, notice the last argument "LG Display"
 may not be included (reserved for input devices):
 
-    sample.script display HDMI3 disconnected
+    xplugd.script display HDMI3 disconnected
 
 or
 
-    sample.script keyboard 3 connected "Topre Corporation Realforce 87"
+    xplugd.script keyboard 3 connected "Topre Corporation Realforce 87"
 
 The keyboard or pointer is always the X slave keyboard or pointer, and
 the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is

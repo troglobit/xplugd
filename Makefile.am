@@ -6,8 +6,8 @@ xplugd_CFLAGS  += -D_POSIX_C_SOURCE=200809L -D_BSD_SOURCE
 xplugd_CFLAGS  += $(X11_CFLAGS) $(Xi_CFLAGS) $(Xrandr_CFLAGS)
 xplugd_LDADD    = $(X11_LIBS) $(Xi_LIBS) $(Xrandr_LIBS)
 
-doc_DATA        = README.md LICENSE
-EXTRA_DIST      = README.md LICENSE
+doc_DATA        = README.md LICENSE xplugd.script
+EXTRA_DIST      = README.md LICENSE xplugd.script
 DISTCLEANFILES  = *~ DEADJOE semantic.cache *.gdb *.elf core core.* *.d
 
 ## Target to run when building a release
