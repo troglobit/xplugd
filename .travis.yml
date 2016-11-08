@@ -10,10 +10,24 @@ compiler:
   - gcc
   - clang
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "OW8+ZttgiqxdsiqrQebn7sEZk6g4PqhtwT5ggrO3H98I/l8lL3FjcN5CxJfJI2NIcInxUd91fOHUvpzuVjJpbEH4m33ao8HIYkSlB6SDMjcXXwMabBDkHwdGiLuI0Pcuv2aSMC4lVFd75Q7/hBOJySjSPf/aDQZBuiyORgRKfHHhLZgOdWGdTbsRbh0cxhoKhZckHTXGJpXh4h2DBfVsdh28vI69Pmv8sbfvRKUYjdI04p9lmE/7TXsTmrSyJXKQhZ/HOyOxUZX5XMlPhTDkdepX9RKUCQVfLyRMQz3dDoijHGT19vFwx+M6b0um7lwh+o8bIrkIkDX02o4bpnaF/mu6nMcxso8Ob40l7JH/DNFwfAwrhC+5ojO42Ewy8ZFMdK3WQmaTf89Oj7iRgpL4gtv825VYeI4UoTnXf/gBSdt2VCSytj4C/jLmxtRZNSkDGAMsALbIm1vE/VA/N8R8NxEEXD0e3yvLwRtzlNYcR4x3g5uGKooT1Yj/guobcBZtXRKgLDvTcnYQKBVOfnYgmVbW82J4TBAtJ9GOA+RCxhff9vvrj6DDmZKdFv7oNYSMaqOe2DxD8vaQ2LrP53s5PD2vXv6bE7gSWVKcNK7ND+1EBYmVTpWVVEtEUAZmSKkypAzS+gDf/Ugzc0ODeLmFPR7WKzW+QXgDvlxylNR2akU="
+
 addons:
   apt:
     packages:
       - tree
+  coverity_scan:
+    project:
+      name: "troglobit/xplugd"
+      description: "Monitor, keyboard, and mouse plug/unplug helper for X"
+    notification_email: troglobit@gmail.com
+    build_command_prepend: "./autogen.sh && ./configure --prefix=/tmp && make clean"
+    build_command: "make"
+    branch_pattern: dev
 
 # We don't store generated files (configure and Makefile) in GIT,
 # so we must customize the default build script to run ./autogen.sh
@@ -25,4 +39,3 @@ script:
   - tree /tmp
   - ldd /tmp/bin/xplugd
   - /tmp/bin/xplugd -h
-
