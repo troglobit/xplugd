@@ -1,6 +1,6 @@
 xplugd - X plug daemon
 ======================
-[![Travis Status][]][Travis]
+[![Travis Status][]][Travis] [![Coverity Status]][Coverity Scan]
 
 `xplugd` is a UNIX daemon that executes a script on X input and RandR
 changes, i.e., when a, keyboard, mouse. or a monitor is plugged in or
@@ -121,6 +121,8 @@ to the `xplugd` project.
 [4]: https://bitbucket.org/andrew_shadura/inputplug
 [Travis]:        https://travis-ci.org/troglobit/xplugd
 [Travis Status]: https://travis-ci.org/troglobit/xplugd.png?branch=master
+[Coverity Scan]:   https://scan.coverity.com/projects/10739
+[Coverity Status]: https://scan.coverity.com/projects/10739/badge.svg
 
 <!--
   -- Local Variables:
