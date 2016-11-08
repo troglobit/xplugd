@@ -27,7 +27,7 @@
 
 int   loglevel = LOG_NOTICE;
 char *cmd;
-
+char *prognm;
 
 static int loglvl(char *level)
 {
@@ -55,7 +55,7 @@ static int usage(int status)
 	       "  -v        Show program version\n\n"
 	       "Copyright (C) 2012-2015 Stefan Bolte\n"
 	       "Copyright (C)      2016 Joachim Nilsson\n\n"
-	       "Bug report address: %s\n\n", __progname, PACKAGE_BUGREPORT);
+	       "Bug report address: %s\n\n", prognm, PACKAGE_BUGREPORT);
 	return status;
 }
 
@@ -63,6 +63,19 @@ static int version(void)
 {
 	printf("v%s\n", PACKAGE_VERSION);
 	return 0;
+}
+
+static char *progname(char *arg0)
+{
+       char *nm;
+
+       nm = strrchr(arg0, '/');
+       if (nm)
+	       nm++;
+       else
+	       nm = arg0;
+
+       return nm;
 }
 
 int main(int argc, char *argv[])
@@ -73,6 +86,7 @@ int main(int argc, char *argv[])
 	int background = 1, logcons = 0;
 	uid_t uid;
 
+	prognm = progname(argv[0]);
 	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
 		switch (c) {
 		case 'h':
@@ -104,7 +118,7 @@ int main(int argc, char *argv[])
 	cmd = argv[optind];
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
-		fprintf(stderr, "%s may not run as root\n", __progname);
+		fprintf(stderr, "%s may not run as root\n", prognm);
 		exit(1);
 	}
 
@@ -115,14 +129,14 @@ int main(int argc, char *argv[])
 
 	if (background) {
 		if (daemon(0, 0)) {
-			fprintf(stderr, "Failed backgrounding %s: %s", __progname, strerror(errno));
+			fprintf(stderr, "Failed backgrounding %s: %s", prognm, strerror(errno));
 			exit(1);
 		}
 	}
 	if (logcons > 0)
 		log_opts |= LOG_PERROR;
 
-	openlog(__progname, log_opts, LOG_USER);
+	openlog(prognm, log_opts, LOG_USER);
 	setlogmask(LOG_UPTO(loglevel));
 
 	exec_init(dpy);

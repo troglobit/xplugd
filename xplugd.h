@@ -45,7 +45,7 @@
 
 extern int   loglevel;
 extern char *cmd;
-extern char *__progname;
+extern char *prognm;
 
 int exec_init      (Display *dpy);
 int exec           (char *type, char *device, char *status, char *name);
