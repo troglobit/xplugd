@@ -20,6 +20,7 @@ addons:
   apt:
     packages:
       - tree
+      - libxrandr-dev
   coverity_scan:
     project:
       name: "troglobit/xplugd"
