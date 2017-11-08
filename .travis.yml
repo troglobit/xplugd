@@ -20,6 +20,7 @@ addons:
   apt:
     packages:
       - tree
+      - libxi-dev
       - libxrandr-dev
   coverity_scan:
     project:
