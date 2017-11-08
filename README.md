@@ -50,36 +50,36 @@ Example
 Example script
 
 ```shell
-    #!/bin/sh
-    LAPTOP=LVDS1
-    DOCK=HDMI3
-    DESKPOS=--left-of
-    PRESPOS=--right-of
-    
-    if [ "$1" != "display" ]; then
-        case "$1,$3,$4" in
-            pointer,conntected,"SynPS/2 Synaptics TouchPad")
-                xinput set-prop $2 'Synaptics Off' 1
-                ;;
-            keyboard,connected,*)
-                setxkbmap -option ctrl:nocaps
-                ;;
-        esac
-        exit 0
-    fi
+#!/bin/sh
+LAPTOP=LVDS1
+DOCK=HDMI3
+DESKPOS=--left-of
+PRESPOS=--right-of
 
-    if [ "$3" = "disconnected" ]; then
-        xrandr --output $2 --off
-        exit 0
-    fi
-    
-    if [ "$2" = "${DOCK}" ]; then
-        xrandr --output $2 --auto --primary ${DESKPOS} ${LAPTOP}
-    elif  [ "$1" != "${LAPTOP}" ]; then
-        xrandr --output $2 --auto ${PRESPOS} ${LAPTOP} --primary
-    else
-        xrandr --auto
-    fi
+if [ "$1" != "display" ]; then
+    case "$1,$3,$4" in
+        pointer,conntected,"SynPS/2 Synaptics TouchPad")
+            xinput set-prop $2 'Synaptics Off' 1
+            ;;
+        keyboard,connected,*)
+            setxkbmap -option ctrl:nocaps
+            ;;
+    esac
+    exit 0
+fi
+
+if [ "$3" = "disconnected" ]; then
+    xrandr --output $2 --off
+    exit 0
+fi
+
+if [ "$2" = "${DOCK}" ]; then
+    xrandr --output $2 --auto --primary ${DESKPOS} ${LAPTOP}
+elif  [ "$1" != "${LAPTOP}" ]; then
+    xrandr --output $2 --auto ${PRESPOS} ${LAPTOP} --primary
+else
+    xrandr --auto
+fi
 ```
 
 
