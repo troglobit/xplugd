@@ -14,7 +14,7 @@ Usage
 
 Program usage:
 
-    xplugd [option] script
+    xplugd [option] [XPLUGRC]
     
     -h        Show help text and exit
     -l LEVEL  Set log level: none, err, info, notice*, debug
@@ -22,32 +22,30 @@ Program usage:
     -s        Use syslog, even if running in foreground, default w/o -n
     -v        Show version info and exit
 
-The script is called with the following arguments:
+When the `XPLUGRC` argument is omitted `xplugd` defaults to use any
+`~/.xplugrc`.  This file is called as a shell script on plug-in events
+with the following arguments:
 
-    xplugd.script TYPE DEVICE STATUS ["Optional Description"]
-                   |    |      |
-                   |    |      `---- connected or disconnected
-                   |    `----------- HDMI3, LVDS1, VGA1, etc.
-                   `---------------- keyboard, pointer, display
+    ~/.xplugrc TYPE DEVICE STATUS ["Optional Description"]
+                |    |      |
+                |    |       `---- connected or disconnected
+                |     `----------- HDMI3, LVDS1, VGA1, etc.
+                 `---------------- keyboard, pointer, display
 
-Example how a script is called, notice the last argument "LG Display"
-may not be included (reserved for input devices):
+The script may be called like this, notice how the description is not
+included for displays:
 
-    xplugd.script display HDMI3 disconnected
-
-or
-
-    xplugd.script keyboard 3 connected "Topre Corporation Realforce 87"
+    ~/.xplugrc display HDMI3 disconnected
+    ~/.xplugrc keyboard 3 connected "Topre Corporation Realforce 87"
 
 The keyboard or pointer is always the X slave keyboard or pointer, and
 the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is
 forwarded to the script as connected and disconnected, respectively.
 
 
-Example
--------
+`~/.xplugrc` example
+--------------------
 
-Example script
 
 ```shell
 #!/bin/sh
@@ -86,8 +84,9 @@ fi
 Build & Install
 ---------------
 
-To build xplugd you need standard X11, X11 input, and Xrandr development
-files.  On a Debian/Ubuntu system these files can be installed with:
+To build `xplugd` you need the standard libraries and header files for
+X11, X11 input, and Xrandr.  On a Debian/Ubuntu system these files can
+be installed with:
 
     sudo apt install libx11-dev libxi-dev libxrandr-dev
 

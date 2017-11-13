@@ -13,7 +13,7 @@
 .Nm
 .Op Fl hnv
 .Op Fl l Ar LEVEL
-.Ar SCRIPT
+.Ar [SCRIPT]
 .Sh DESCRIPTION
 .Nm
 is a daemon that executes a script on X input and RandR changes, i.e.,
@@ -50,9 +50,11 @@ Use syslog, even if running in foreground, default w/o
 Show version information and exit
 .El
 .Pp
-The
-.Ar SCRIPT
-is called with the following arguments:
+The optional
+.Pa SCRIPT
+argument defaults to
+.Pa ~/.xplugrc
+and is called with the following arguments:
 .Bl -tag -width Ds -offset indent
 .It $1 = Ar TYPE
 One of
@@ -77,7 +79,7 @@ xplugd my-script.sh
 .Ed
 .Pp
 Where
-.Ar my-script.sh
+.Pa my-script.sh
 could look something like this:
 .Bd -literal -offset indent
 #!/bin/sh
@@ -102,6 +104,8 @@ case "$type,$device,$status,$desc" in
         ;;
 esac
 .Ed
+.Sh FILES
+.Pa ~/.xplugrc
 .Sh SEE ALSO
 .Aq http://bitbucket.org/portix/srandrd
 .Aq https://bitbucket.org/andrew_shadura/inputplug
