@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2012-2015  Stefan Bolte <portix@gmx.net>
  * Copyright (C) 2013-2015  Andrew Shadura <andrewsh@debian.org>
- * Copyright (C) 2016       Joachim Nilsson <troglobit@gmail.com>
+ * Copyright (C) 2016-2017  Joachim Nilsson <troglobit@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,11 +23,32 @@
  */
 
 #define SYSLOG_NAMES
+#include <glob.h>
 #include "xplugd.h"
 
 int   loglevel = LOG_NOTICE;
 char *cmd;
 char *prognm;
+
+static char *rcfile(char *arg)
+{
+	char *rc;
+	glob_t gl;
+
+	if (!arg)
+		arg = XPLUGRC;
+
+	if (glob(arg, GLOB_TILDE, NULL, &gl))
+		return NULL;
+
+	if (gl.gl_pathc < 1)
+		return NULL;
+
+	rc = strdup(gl.gl_pathv[0]);
+	globfree(&gl);
+
+	return rc;
+}
 
 static int loglvl(char *level)
 {
@@ -46,15 +67,15 @@ static int error_handler(void)
 
 static int usage(int status)
 {
-	printf("Usage: %s [OPTIONS] script\n\n"
+	printf("Usage: %s [OPTIONS] [XPLUGRC]\n\n"
 	       "Options:\n"
 	       "  -h        Print this help text and exit\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
 	       "  -n        Run in foreground, do not fork to background\n"
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n\n"
-	       "Copyright (C) 2012-2015 Stefan Bolte\n"
-	       "Copyright (C)      2016 Joachim Nilsson\n\n"
+	       "Copyright (C) 2012-2015  Stefan Bolte\n"
+	       "Copyright (C) 2016-2017  Joachim Nilsson\n\n"
 	       "Bug report address: %s\n\n", prognm, PACKAGE_BUGREPORT);
 	return status;
 }
@@ -81,10 +102,11 @@ static char *progname(char *arg0)
 int main(int argc, char *argv[])
 {
 	int c, log_opts = LOG_CONS | LOG_PID;
+	int background = 1, logcons = 0;
+	char *arg = NULL;
+	uid_t uid;
 	XEvent ev;
 	Display *dpy;
-	int background = 1, logcons = 0;
-	uid_t uid;
 
 	prognm = progname(argv[0]);
 	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
@@ -113,9 +135,14 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (optind >= argc)
+	if (optind < argc)
+		arg = argv[optind];
+
+	cmd = rcfile(arg);
+	if (!cmd)
 		return usage(1);
-	cmd = argv[optind];
+	printf("Found %s\n", cmd);
+	return 0;
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", prognm);

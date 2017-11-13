@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2012-2015  Stefan Bolte <portix@gmx.net>
  * Copyright (C) 2013-2015  Andrew Shadura <andrewsh@debian.org>
- * Copyright (C) 2016       Joachim Nilsson <troglobit@gmail.com>
+ * Copyright (C) 2016-2017  Joachim Nilsson <troglobit@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,6 +42,7 @@
 #include <X11/extensions/Xrandr.h>
 
 #define MSG_LEN 128
+#define XPLUGRC "~/.xplugrc"
 
 extern int   loglevel;
 extern char *cmd;
