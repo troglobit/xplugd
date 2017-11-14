@@ -67,16 +67,19 @@ static int error_handler(void)
 
 static int usage(int status)
 {
-	printf("Usage: %s [OPTIONS] [XPLUGRC]\n\n"
+	printf("Usage: %s [OPTIONS] [FILE]\n\n"
 	       "Options:\n"
 	       "  -h        Print this help text and exit\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
 	       "  -n        Run in foreground, do not fork to background\n"
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
-	       "  -v        Show program version\n\n"
+	       "  -v        Show program version\n"
+	       "\n"
+	       " FILE       Optional script file argument, default ~/.xplugrc\n"
+	       "\n"
 	       "Copyright (C) 2012-2015  Stefan Bolte\n"
 	       "Copyright (C) 2016-2017  Joachim Nilsson\n\n"
-	       "Bug report address: %s\n\n", prognm, PACKAGE_BUGREPORT);
+	       "Bug report address: %s\n", prognm, PACKAGE_BUGREPORT);
 	return status;
 }
 
