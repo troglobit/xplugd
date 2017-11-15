@@ -144,8 +144,6 @@ int main(int argc, char *argv[])
 	cmd = rcfile(arg);
 	if (!cmd)
 		return usage(1);
-	printf("Found %s\n", cmd);
-	return 0;
 
 	if (((uid = getuid()) == 0) || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", prognm);
