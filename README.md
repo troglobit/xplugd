@@ -42,6 +42,8 @@ The keyboard or pointer is always the X slave keyboard or pointer, and
 the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is
 forwarded to the script as connected and disconnected, respectively.
 
+If EDID data is available from a connected display, the monitor name is
+passed in as fourth argument ("Optional Description") to the script.
 
 `~/.xplugrc` example
 --------------------

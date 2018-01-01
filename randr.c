@@ -21,15 +21,51 @@
  */
 
 #include "xplugd.h"
+#include "edid.h"
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
+int get_monitor_name(char *name, char *monitor_name)
+{
+	char path[255];
+	FILE *fp = NULL;
+	size_t result;
+	unsigned char edid[128];
+	MonitorInfo *info;
+
+	snprintf(path, sizeof(path), "/sys/class/drm/card0-%s/edid", name);
+	syslog(LOG_DEBUG, "DRM device sysfs path %s\n", path);
+	fp = fopen(path, "rb");
+	if (!fp) {
+		syslog(LOG_ERR, "Failed to find sys path for %s\n", name);
+		return -1;
+	}
+
+	result = fread (edid, 1, sizeof(edid), fp);
+	if (result != 128) {
+		syslog(LOG_NOTICE, "No EDID data found");
+		syslog(LOG_DEBUG, "DRM device sysfs path %s\n", path);
+		return -1;
+	}
+
+	info = decode_edid(edid);
+	if (info == NULL) {
+		syslog(LOG_ERR, "decode failure\n");
+		return -1;
+	}
+
+	syslog(LOG_DEBUG, "MODEL: %s\n", info->dsc_product_name);
+	strncpy(monitor_name, info->dsc_product_name, 14);
+
+	return 0;
+}
 static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 {
 	char msg[MSG_LEN];
 	static char old_msg[MSG_LEN] = "";
 	XRROutputInfo *info;
 	XRRScreenResources *resources;
+	char monitor_name[14] = {0};
 
 	resources = XRRGetScreenResources(ev->display, ev->window);
 	if (!resources) {
@@ -71,7 +107,10 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 		}
 	}
 
-	exec("display", info->name, con_actions[info->connection], NULL);
+	if (!strcmp(con_actions[info->connection], "connected"))
+		get_monitor_name(info->name, monitor_name);
+
+	exec("display", info->name, con_actions[info->connection], monitor_name);
 done:
 	XRRFreeOutputInfo(info);
 	XRRFreeScreenResources(resources);
