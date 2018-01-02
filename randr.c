@@ -29,7 +29,6 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 {
 	char path[255];
 	FILE *fp = NULL;
-	size_t result;
 	unsigned char edid[128];
 	struct monitor_info *info;
 
@@ -41,15 +40,12 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 		return -1;
 	}
 
-	result = fread(edid, 1, sizeof(edid), fp);
-	if (result != 128) {
-		syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
-		return -1;
-	}
-
-	info = edid_decode(edid);
+	info = edid_decode(edid, fread(edid, 1, sizeof(edid), fp));
 	if (!info) {
-		syslog(LOG_ERR, "decode failure");
+		if (ENODATA == errno || ENOENT == errno)
+			syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
+		else
+			syslog(LOG_DEBUG, "Failed decoding EDID data: %s", strerror(errno));
 		return -1;
 	}
 

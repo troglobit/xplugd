@@ -22,9 +22,10 @@
 
 /* Author: Soren Sandmann <sandmann@redhat.com> */
 
-#include "edid.h"
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include "edid.h"
 
 static int is_edid_header(const unsigned char *edid)
 {
@@ -114,9 +115,18 @@ static void decode_checksum(const unsigned char *edid, struct monitor_info *info
 	info->checksum = check;
 }
 
-struct monitor_info *edid_decode(const unsigned char *edid)
+struct monitor_info *edid_decode(const unsigned char *edid, size_t len)
 {
 	struct monitor_info *info;
+
+	if (!edid) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (len != 128) {
+		errno = ENODATA;
+		return NULL;
+	}
 
 	info = calloc(1, sizeof(struct monitor_info));
 	if (!info)
@@ -124,8 +134,10 @@ struct monitor_info *edid_decode(const unsigned char *edid)
 
 	decode_checksum(edid, info);
 
-	if (!is_edid_header(edid))
+	if (!is_edid_header(edid)) {
+		errno = ENOENT;
 		return NULL;
+	}
 
 	decode_descriptors(edid, info);
 
