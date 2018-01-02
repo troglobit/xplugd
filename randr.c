@@ -47,7 +47,7 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 		return -1;
 	}
 
-	info = decode_edid(edid);
+	info = edid_decode(edid);
 	if (!info) {
 		syslog(LOG_ERR, "decode failure");
 		return -1;

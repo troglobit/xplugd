@@ -100,7 +100,7 @@ static int decode_descriptors(const uchar *edid, MonitorInfo *info)
 	return 1;
 }
 
-static void decode_check_sum(const uchar *edid, MonitorInfo *info)
+static void decode_checksum(const uchar *edid, MonitorInfo *info)
 {
 	int i;
 	uchar check = 0;
@@ -111,7 +111,7 @@ static void decode_check_sum(const uchar *edid, MonitorInfo *info)
 	info->checksum = check;
 }
 
-MonitorInfo *decode_edid(const uchar *edid)
+MonitorInfo *edid_decode(const uchar *edid)
 {
 	MonitorInfo *info;
 
@@ -119,7 +119,7 @@ MonitorInfo *decode_edid(const uchar *edid)
 	if (!info)
 		return NULL;
 
-	decode_check_sum(edid, info);
+	decode_checksum(edid, info);
 
 	if (!is_edid_header(edid))
 		return NULL;
