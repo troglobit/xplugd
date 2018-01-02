@@ -113,7 +113,11 @@ static void decode_check_sum(const uchar *edid, MonitorInfo *info)
 
 MonitorInfo *decode_edid(const uchar *edid)
 {
-	MonitorInfo *info = calloc(1, sizeof(MonitorInfo));
+	MonitorInfo *info;
+
+	info = calloc(1, sizeof(MonitorInfo));
+	if (!info)
+		return NULL;
 
 	decode_check_sum(edid, info);
 
