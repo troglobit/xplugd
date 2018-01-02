@@ -94,7 +94,7 @@ static void decode_display_descriptor(const unsigned char *desc, struct monitor_
 	}
 }
 
-static int decode_descriptors(const unsigned char *edid, struct monitor_info *info)
+static void decode_descriptors(const unsigned char *edid, struct monitor_info *info)
 {
 	for (int i = 0; i < 4; ++i) {
 		int index = 0x36 + i * 18;
@@ -102,8 +102,6 @@ static int decode_descriptors(const unsigned char *edid, struct monitor_info *in
 		if (edid[index + 0] == 0x00 && edid[index + 1] == 0x00)
 			decode_display_descriptor(edid + index, info);
 	}
-
-	return 1;
 }
 
 static void decode_checksum(const unsigned char *edid, struct monitor_info *info)
@@ -129,8 +127,7 @@ struct monitor_info *edid_decode(const unsigned char *edid)
 	if (!is_edid_header(edid))
 		return NULL;
 
-	if (!decode_descriptors(edid, info))
-		return NULL;
+	decode_descriptors(edid, info);
 
 	return info;
 }
