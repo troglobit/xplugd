@@ -30,23 +30,23 @@ static int is_edid_header(const uchar *edid)
 {
 	if (memcmp(edid, "\x00\xff\xff\xff\xff\xff\xff\x00", 8) == 0)
 		return 1;
+
 	return 0;
 }
 
 static void decode_lf_string(const uchar *s, int n_chars, char *result)
 {
-	int i;
-
-	for (i = 0; i < n_chars; ++i) {
+	for (int i = 0; i < n_chars; ++i) {
 		if (s[i] == 0x0a) {
 			*result++ = '\0';
 			break;
-		} else if (s[i] == 0x00) {
+		}
+
+		if (s[i] == 0x00)
 			/* Convert embedded 0's to spaces */
 			*result++ = ' ';
-		} else {
+		else
 			*result++ = s[i];
-		}
 	}
 }
 
@@ -56,30 +56,39 @@ static void decode_display_descriptor(const uchar *desc, struct monitor_info *in
 	case 0xFC:
 		decode_lf_string(desc + 5, 13, info->dsc_product_name);
 		break;
+
 	case 0xFF:
 		decode_lf_string(desc + 5, 13, info->dsc_serial_number);
 		break;
+
 	case 0xFE:
 		decode_lf_string(desc + 5, 13, info->dsc_string);
 		break;
+
 	case 0xFD:
 		/* Range Limits */
 		break;
+
 	case 0xFB:
 		/* Color Point */
 		break;
+
 	case 0xFA:
 		/* Timing Identifications */
 		break;
+
 	case 0xF9:
 		/* Color Management */
 		break;
+
 	case 0xF8:
 		/* Timing Codes */
 		break;
+
 	case 0xF7:
 		/* Established Timings */
 		break;
+
 	case 0x10:
 		break;
 	}
@@ -87,14 +96,11 @@ static void decode_display_descriptor(const uchar *desc, struct monitor_info *in
 
 static int decode_descriptors(const uchar *edid, struct monitor_info *info)
 {
-	int i;
-
-	for (i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		int index = 0x36 + i * 18;
 
-		if (edid[index + 0] == 0x00 && edid[index + 1] == 0x00) {
+		if (edid[index + 0] == 0x00 && edid[index + 1] == 0x00)
 			decode_display_descriptor(edid + index, info);
-		}
 	}
 
 	return 1;
@@ -102,10 +108,9 @@ static int decode_descriptors(const uchar *edid, struct monitor_info *info)
 
 static void decode_checksum(const uchar *edid, struct monitor_info *info)
 {
-	int i;
 	uchar check = 0;
 
-	for (i = 0; i < 128; ++i)
+	for (int i = 0; i < 128; ++i)
 		check += edid[i];
 
 	info->checksum = check;
