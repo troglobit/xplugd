@@ -34,27 +34,26 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 	MonitorInfo *info;
 
 	snprintf(path, sizeof(path), "/sys/class/drm/card0-%s/edid", name);
-	syslog(LOG_DEBUG, "DRM device sysfs path %s\n", path);
+	syslog(LOG_DEBUG, "DRM device sysfs path %s", path);
 	fp = fopen(path, "rb");
 	if (!fp) {
-		syslog(LOG_ERR, "Failed to find sys path for %s\n", name);
+		syslog(LOG_ERR, "Failed to find sys path for %s", name);
 		return -1;
 	}
 
 	result = fread(edid, 1, sizeof(edid), fp);
 	if (result != 128) {
-		syslog(LOG_NOTICE, "No EDID data found");
-		syslog(LOG_DEBUG, "DRM device sysfs path %s\n", path);
+		syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
 		return -1;
 	}
 
 	info = decode_edid(edid);
 	if (!info) {
-		syslog(LOG_ERR, "decode failure\n");
+		syslog(LOG_ERR, "decode failure");
 		return -1;
 	}
 
-	syslog(LOG_DEBUG, "MODEL: %s\n", info->dsc_product_name);
+	syslog(LOG_DEBUG, "MODEL: %s", info->dsc_product_name);
 	strncpy(monitor_name, info->dsc_product_name, len);
 	free(info);
 
