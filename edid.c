@@ -135,6 +135,7 @@ struct monitor_info *edid_decode(const unsigned char *edid, size_t len)
 	decode_checksum(edid, info);
 
 	if (!is_edid_header(edid)) {
+		free(info);
 		errno = ENOENT;
 		return NULL;
 	}
