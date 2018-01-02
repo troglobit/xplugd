@@ -25,7 +25,7 @@
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
-int get_monitor_name(const char *name, char *monitor_name, size_t len)
+static int get_monitor_name(const char *name, char *monitor_name, size_t len)
 {
 	char path[255];
 	FILE *fp = NULL;
@@ -57,6 +57,7 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 
 	return 0;
 }
+
 static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 {
 	char msg[MSG_LEN];
