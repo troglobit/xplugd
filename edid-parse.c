@@ -26,14 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TRUE 1
-#define FALSE 0
-
-static int decode_header(const uchar *edid)
+static int is_edid_header(const uchar *edid)
 {
 	if (memcmp(edid, "\x00\xff\xff\xff\xff\xff\xff\x00", 8) == 0)
-		return TRUE;
-	return FALSE;
+		return 1;
+	return 0;
 }
 
 static void decode_lf_string(const uchar *s, int n_chars, char *result)
@@ -100,7 +97,7 @@ static int decode_descriptors(const uchar *edid, MonitorInfo * info)
 		}
 	}
 
-	return TRUE;
+	return 1;
 }
 
 static void decode_check_sum(const uchar *edid, MonitorInfo * info)
@@ -120,7 +117,7 @@ MonitorInfo *decode_edid(const uchar *edid)
 
 	decode_check_sum(edid, info);
 
-	if (!decode_header(edid))
+	if (!is_edid_header(edid))
 		return NULL;
 
 	if (!decode_descriptors(edid, info))
