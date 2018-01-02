@@ -25,7 +25,7 @@
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
-int get_monitor_name(char *name, char *monitor_name)
+int get_monitor_name(const char *name, char *monitor_name, size_t len)
 {
 	char path[255];
 	FILE *fp = NULL;
@@ -55,7 +55,7 @@ int get_monitor_name(char *name, char *monitor_name)
 	}
 
 	syslog(LOG_DEBUG, "MODEL: %s\n", info->dsc_product_name);
-	strncpy(monitor_name, info->dsc_product_name, 14);
+	strncpy(monitor_name, info->dsc_product_name, len);
 	free(info);
 
 	return 0;
@@ -109,7 +109,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 	}
 
 	if (!strcmp(con_actions[info->connection], "connected"))
-		get_monitor_name(info->name, monitor_name);
+		get_monitor_name(info->name, monitor_name, sizeof(monitor_name));
 
 	exec("display", info->name, con_actions[info->connection], monitor_name);
 done:
