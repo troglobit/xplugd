@@ -50,7 +50,7 @@ static void decode_lf_string(const uchar *s, int n_chars, char *result)
 	}
 }
 
-static void decode_display_descriptor(const uchar *desc, MonitorInfo *info)
+static void decode_display_descriptor(const uchar *desc, struct monitor_info *info)
 {
 	switch (desc[0x03]) {
 	case 0xFC:
@@ -85,7 +85,7 @@ static void decode_display_descriptor(const uchar *desc, MonitorInfo *info)
 	}
 }
 
-static int decode_descriptors(const uchar *edid, MonitorInfo *info)
+static int decode_descriptors(const uchar *edid, struct monitor_info *info)
 {
 	int i;
 
@@ -100,7 +100,7 @@ static int decode_descriptors(const uchar *edid, MonitorInfo *info)
 	return 1;
 }
 
-static void decode_checksum(const uchar *edid, MonitorInfo *info)
+static void decode_checksum(const uchar *edid, struct monitor_info *info)
 {
 	int i;
 	uchar check = 0;
@@ -111,11 +111,11 @@ static void decode_checksum(const uchar *edid, MonitorInfo *info)
 	info->checksum = check;
 }
 
-MonitorInfo *edid_decode(const uchar *edid)
+struct monitor_info *edid_decode(const uchar *edid)
 {
-	MonitorInfo *info;
+	struct monitor_info *info;
 
-	info = calloc(1, sizeof(MonitorInfo));
+	info = calloc(1, sizeof(struct monitor_info));
 	if (!info)
 		return NULL;
 

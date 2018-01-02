@@ -23,9 +23,8 @@
 /* Author: Soren Sandmann <sandmann@redhat.com> */
 
 typedef unsigned char uchar;
-typedef struct MonitorInfo MonitorInfo;
 
-struct MonitorInfo {
+struct monitor_info {
 	int checksum;
 
 	/* Optional product description */
@@ -36,7 +35,7 @@ struct MonitorInfo {
 	char dsc_string[14];
 };
 
-MonitorInfo *edid_decode(const uchar *data);
+struct monitor_info *edid_decode(const uchar *data);
 
 /**
  * Local Variables:

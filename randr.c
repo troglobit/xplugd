@@ -31,7 +31,7 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 	FILE *fp = NULL;
 	size_t result;
 	unsigned char edid[128];
-	MonitorInfo *info;
+	struct monitor_info *info;
 
 	snprintf(path, sizeof(path), "/sys/class/drm/card0-%s/edid", name);
 	syslog(LOG_DEBUG, "DRM device sysfs path %s", path);
