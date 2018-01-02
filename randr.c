@@ -56,6 +56,7 @@ int get_monitor_name(char *name, char *monitor_name)
 
 	syslog(LOG_DEBUG, "MODEL: %s\n", info->dsc_product_name);
 	strncpy(monitor_name, info->dsc_product_name, 14);
+	free(info);
 
 	return 0;
 }
