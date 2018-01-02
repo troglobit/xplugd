@@ -41,7 +41,7 @@ int get_monitor_name(char *name, char *monitor_name)
 		return -1;
 	}
 
-	result = fread (edid, 1, sizeof(edid), fp);
+	result = fread(edid, 1, sizeof(edid), fp);
 	if (result != 128) {
 		syslog(LOG_NOTICE, "No EDID data found");
 		syslog(LOG_DEBUG, "DRM device sysfs path %s\n", path);
@@ -49,7 +49,7 @@ int get_monitor_name(char *name, char *monitor_name)
 	}
 
 	info = decode_edid(edid);
-	if (info == NULL) {
+	if (!info) {
 		syslog(LOG_ERR, "decode failure\n");
 		return -1;
 	}

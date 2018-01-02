@@ -25,8 +25,7 @@
 typedef unsigned char uchar;
 typedef struct MonitorInfo MonitorInfo;
 
-struct MonitorInfo
-{
+struct MonitorInfo {
 	int checksum;
 
 	/* Optional product description */
@@ -37,7 +36,7 @@ struct MonitorInfo
 	char dsc_string[14];
 };
 
-MonitorInfo *decode_edid (const uchar *data);
+MonitorInfo *decode_edid(const uchar *data);
 
 /**
  * Local Variables:
