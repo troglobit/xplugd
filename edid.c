@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int is_edid_header(const uchar *edid)
+static int is_edid_header(const unsigned char *edid)
 {
 	if (memcmp(edid, "\x00\xff\xff\xff\xff\xff\xff\x00", 8) == 0)
 		return 1;
@@ -34,7 +34,7 @@ static int is_edid_header(const uchar *edid)
 	return 0;
 }
 
-static void decode_lf_string(const uchar *s, int n_chars, char *result)
+static void decode_lf_string(const unsigned char *s, int n_chars, char *result)
 {
 	for (int i = 0; i < n_chars; ++i) {
 		if (s[i] == 0x0a) {
@@ -50,7 +50,7 @@ static void decode_lf_string(const uchar *s, int n_chars, char *result)
 	}
 }
 
-static void decode_display_descriptor(const uchar *desc, struct monitor_info *info)
+static void decode_display_descriptor(const unsigned char *desc, struct monitor_info *info)
 {
 	switch (desc[0x03]) {
 	case 0xFC:
@@ -94,7 +94,7 @@ static void decode_display_descriptor(const uchar *desc, struct monitor_info *in
 	}
 }
 
-static int decode_descriptors(const uchar *edid, struct monitor_info *info)
+static int decode_descriptors(const unsigned char *edid, struct monitor_info *info)
 {
 	for (int i = 0; i < 4; ++i) {
 		int index = 0x36 + i * 18;
@@ -106,9 +106,9 @@ static int decode_descriptors(const uchar *edid, struct monitor_info *info)
 	return 1;
 }
 
-static void decode_checksum(const uchar *edid, struct monitor_info *info)
+static void decode_checksum(const unsigned char *edid, struct monitor_info *info)
 {
-	uchar check = 0;
+	unsigned char check = 0;
 
 	for (int i = 0; i < 128; ++i)
 		check += edid[i];
@@ -116,7 +116,7 @@ static void decode_checksum(const uchar *edid, struct monitor_info *info)
 	info->checksum = check;
 }
 
-struct monitor_info *edid_decode(const uchar *edid)
+struct monitor_info *edid_decode(const unsigned char *edid)
 {
 	struct monitor_info *info;
 
