@@ -97,7 +97,7 @@ Then simply run the configure script and make:
     ./configure && make
 
 Unless building from the GIT sources, in which case `./autogen.sh` first
-must be called to create the configure script.  In relased tarballs this
+must be called to create the configure script.  With relased tarballs this
 is not necessary.
 
 To change the default installation prefix from `/usr/local`, use the
