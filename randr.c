@@ -46,12 +46,14 @@ int get_monitor_name(const char *name, char *monitor_name, size_t len)
 			syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
 		else
 			syslog(LOG_DEBUG, "Failed decoding EDID data: %s", strerror(errno));
+		fclose(fp);
 		return -1;
 	}
 
 	syslog(LOG_DEBUG, "MODEL: %s", info->dsc_product_name);
 	strncpy(monitor_name, info->dsc_product_name, len);
 	free(info);
+	fclose(fp);
 
 	return 0;
 }
