@@ -3,6 +3,17 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
+[v1.3][] - 20018-02-01
+----------------------
+
+### Changes
+- Portability, replace `__progname` with a small function
+- Make script argument optional, default to `~/.xplugrc`
+- Add support for monitor description using EDID, by Magnus Malm
+
+### Fixes
+- Fix SynPS/2 matching, `conntected` vs `connected`
+
 
 [v1.2][] - 20016-06-25
 ----------------------
