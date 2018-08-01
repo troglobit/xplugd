@@ -88,7 +88,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 	static char old_msg[MSG_LEN] = "";
 	XRROutputInfo *info;
 	XRRScreenResources *resources;
-	char monitor_name[14] = {0};
+	char monitor_name[14] = { 0 };
 
 	resources = XRRGetScreenResources(ev->display, ev->window);
 	if (!resources) {
@@ -134,7 +134,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 		get_monitor_name(info->name, dpy, resources, monitor_name, sizeof(monitor_name));
 
 	exec("display", info->name, con_actions[info->connection], monitor_name);
-done:
+ done:
 	XRRFreeOutputInfo(info);
 	XRRFreeScreenResources(resources);
 }
