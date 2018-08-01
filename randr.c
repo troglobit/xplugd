@@ -27,56 +27,51 @@ static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
 static int get_monitor_name(const char *name, Display *display, XRRScreenResources *res, char *monitor_name, size_t len)
 {
-	char path[255];
 	struct monitor_info *info = NULL;
 	int i, j, np;
 	Atom *p;
 
 	for (i = 0; i < res->noutput; ++i) {
-		syslog(LOG_DEBUG, "res->output[%d]", i);
 		XRROutputInfo *output_info = XRRGetOutputInfo(display, res,
 							      res->outputs[i]);
-		if (!output_info) {
-			syslog(LOG_DEBUG, "No output_info at index %d.", i);
+
+		if (!output_info)
 			continue;
-		}
 
-		if (strcmp(output_info->name, name)){
-			syslog(LOG_DEBUG, "No MATCH res (%s) for screen %s at index %d",
-			       output_info->name, name, i);
+		if (output_info->connection != RR_Connected)
 			continue;
-		}
-		else
-			syslog(LOG_DEBUG, "MATCH res (%s) for screen %s at index %d",
-			       output_info->name, name, i);
 
-		p = XRRListOutputProperties(display, res->outputs[i], &np);
-		for (j = 0; j < np; ++j) {
-			syslog(LOG_DEBUG, "Check prop nr %d", j);
-			unsigned char *prop;
-			int actual_format;
-			unsigned long nitems, bytes_after;
-			Atom actual_type;
-			/* XRRPropertyInfo *propinfo; */
+		if (strcmp(output_info->name, name)) {
+			continue;
+		} else {
+			p = XRRListOutputProperties(display, res->outputs[i], &np);
+			for (j = 0; j < np; ++j) {
+				unsigned char *prop;
+				int actual_format;
+				unsigned long nitems, bytes_after;
+				Atom actual_type;
 
-			XRRGetOutputProperty(display, res->outputs[i], p[j], 0, 100,
-					     False, False, AnyPropertyType, &actual_type, &actual_format,
-					     &nitems, &bytes_after, &prop);
+				XRRGetOutputProperty(display, res->outputs[i], p[j], 0, 128,
+						     False, False, AnyPropertyType, &actual_type, &actual_format,
+						     &nitems, &bytes_after, &prop);
 
-			if (!strcmp(XGetAtomName(display, p[j]), "EDID")) {
-				syslog(LOG_DEBUG, "Found EDID  at res index %d!", j);
-				info = edid_decode(prop, nitems);
+				if (!strcmp(XGetAtomName(display, p[j]), "EDID")) {
+					if (nitems >= 128) {
+						info = edid_decode(prop);
+					} else {
+						syslog(LOG_INFO,
+						       "Not enough EDID data found. Need at least 128 bytes, got %lu bytes",
+						       nitems);
+					}
+					break;
+				}
 			}
-			else
-				syslog(LOG_DEBUG, "No EDID found at res index %d!", j);
-		} // prop list loop
-	} // res loop
+			break;
+		}
+	}
 
 	if (!info) {
-		if (ENODATA == errno || ENOENT == errno)
-			syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
-		else
-			syslog(LOG_DEBUG, "Failed decoding EDID data: %s", strerror(errno));
+		syslog(LOG_INFO, "Failed decoding EDID data: %s", strerror(errno));
 		return -1;
 	}
 
