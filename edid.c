@@ -115,16 +115,12 @@ static void decode_checksum(const unsigned char *edid, struct monitor_info *info
 	info->checksum = check;
 }
 
-struct monitor_info *edid_decode(const unsigned char *edid, size_t len)
+struct monitor_info *edid_decode(const unsigned char *edid)
 {
 	struct monitor_info *info;
 
 	if (!edid) {
 		errno = EINVAL;
-		return NULL;
-	}
-	if (len != 128) {
-		errno = ENODATA;
 		return NULL;
 	}
 

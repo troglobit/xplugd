@@ -25,35 +25,59 @@
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
-static int get_monitor_name(const char *name, char *monitor_name, size_t len)
+static int get_monitor_name(const char *name, Display *display, XRRScreenResources *res, char *monitor_name, size_t len)
 {
-	char path[255];
-	FILE *fp = NULL;
-	unsigned char edid[128];
-	struct monitor_info *info;
+	struct monitor_info *info = NULL;
+	int i, j, np;
+	Atom *p;
 
-	snprintf(path, sizeof(path), "/sys/class/drm/card0-%s/edid", name);
-	syslog(LOG_DEBUG, "DRM device sysfs path %s", path);
-	fp = fopen(path, "rb");
-	if (!fp) {
-		syslog(LOG_ERR, "Failed to find sys path for %s", name);
-		return -1;
+	for (i = 0; i < res->noutput; ++i) {
+		XRROutputInfo *output_info = XRRGetOutputInfo(display, res,
+							      res->outputs[i]);
+
+		if (!output_info)
+			continue;
+
+		if (output_info->connection != RR_Connected)
+			continue;
+
+		if (strcmp(output_info->name, name)) {
+			continue;
+		} else {
+			p = XRRListOutputProperties(display, res->outputs[i], &np);
+			for (j = 0; j < np; ++j) {
+				unsigned char *prop;
+				int actual_format;
+				unsigned long nitems, bytes_after;
+				Atom actual_type;
+
+				XRRGetOutputProperty(display, res->outputs[i], p[j], 0, 128,
+						     False, False, AnyPropertyType, &actual_type, &actual_format,
+						     &nitems, &bytes_after, &prop);
+
+				if (!strcmp(XGetAtomName(display, p[j]), "EDID")) {
+					if (nitems >= 128) {
+						info = edid_decode(prop);
+					} else {
+						syslog(LOG_INFO,
+						       "Not enough EDID data found. Need at least 128 bytes, got %lu bytes",
+						       nitems);
+					}
+					break;
+				}
+			}
+			break;
+		}
 	}
 
-	info = edid_decode(edid, fread(edid, 1, sizeof(edid), fp));
 	if (!info) {
-		if (ENODATA == errno || ENOENT == errno)
-			syslog(LOG_DEBUG, "No EDID data found at DRM device sysfs path %s", path);
-		else
-			syslog(LOG_DEBUG, "Failed decoding EDID data: %s", strerror(errno));
-		fclose(fp);
+		syslog(LOG_INFO, "Failed decoding EDID data: %s", strerror(errno));
 		return -1;
 	}
 
 	syslog(LOG_DEBUG, "MODEL: %s", info->dsc_product_name);
 	strncpy(monitor_name, info->dsc_product_name, len);
 	free(info);
-	fclose(fp);
 
 	return 0;
 }
@@ -64,7 +88,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 	static char old_msg[MSG_LEN] = "";
 	XRROutputInfo *info;
 	XRRScreenResources *resources;
-	char monitor_name[14] = {0};
+	char monitor_name[14] = { 0 };
 
 	resources = XRRGetScreenResources(ev->display, ev->window);
 	if (!resources) {
@@ -107,10 +131,10 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 	}
 
 	if (!strcmp(con_actions[info->connection], "connected"))
-		get_monitor_name(info->name, monitor_name, sizeof(monitor_name));
+		get_monitor_name(info->name, dpy, resources, monitor_name, sizeof(monitor_name));
 
 	exec("display", info->name, con_actions[info->connection], monitor_name);
-done:
+ done:
 	XRRFreeOutputInfo(info);
 	XRRFreeScreenResources(resources);
 }

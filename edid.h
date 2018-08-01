@@ -33,7 +33,7 @@ struct monitor_info {
 	char dsc_string[14];
 };
 
-struct monitor_info *edid_decode(const unsigned char *data, size_t len);
+struct monitor_info *edid_decode(const unsigned char *data);
 
 /**
  * Local Variables:
