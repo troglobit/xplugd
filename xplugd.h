@@ -57,6 +57,7 @@ int input_event    (Display *dpy, XEvent *ev);
 
 int randr_init     (Display *dpy);
 int randr_event    (Display *dpy, XEvent *ev);
+int randr_probe    (Display *dpy);
 
 #endif /* XPLUGD_H_ */
 

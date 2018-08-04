@@ -12,19 +12,19 @@ detect when docking or undocking a laptop.
 Usage
 -----
 
-Program usage:
-
-    xplugd [option] [XPLUGRC]
+    xplugd [-hnpsv] [-l LEVEL] [FILE]
     
     -h        Show help text and exit
     -l LEVEL  Set log level: none, err, info, notice*, debug
     -n        Run in foreground, do not fork to background
+    -p        Probe currently connected outputs and output EDID info.
     -s        Use syslog, even if running in foreground, default w/o -n
     -v        Show version info and exit
+    
+    FILE       Optional script file argument, default ~/.xplugrc
 
-When the `XPLUGRC` argument is omitted `xplugd` defaults to use any
-`~/.xplugrc`.  This file is called as a shell script on plug-in events
-with the following arguments:
+When `FILE` is omitted `xplugd` defaults to use `~/.xplugrc`.  This file
+is called as a shell script on plug events with the following arguments:
 
     ~/.xplugrc TYPE DEVICE STATUS ["Optional Description"]
                 |    |      |
@@ -42,14 +42,13 @@ The keyboard or pointer is always the X slave keyboard or pointer, and
 the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is
 forwarded to the script as connected and disconnected, respectively.
 
-If EDID data is available from a connected display, the monitor name is
+If EDID data is available from a connected display, the monitor model is
 passed in as fourth argument ("Optional Description") to the script.
 
-`~/.xplugrc` example
---------------------
 
+### Example ~/.xplugrc
 
-```shell
+```sh
 #!/bin/sh
 LAPTOP=LVDS1
 DOCK=HDMI3
@@ -92,7 +91,7 @@ be installed with:
 
     sudo apt install libx11-dev libxi-dev libxrandr-dev
 
-Then simply run the configure script and make:
+Then run the configure script and make:
 
     ./configure && make
 

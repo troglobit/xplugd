@@ -155,6 +155,57 @@ int randr_event(Display *dpy, XEvent *ev)
 	return 0;
 }
 
+int randr_probe(Display *dpy)
+{
+	struct monitor_info *info;
+	XRRScreenResources *res;
+	Window root;
+	Atom *p;
+	int i;
+
+	root = RootWindow(dpy, DefaultScreen(dpy));
+	res = XRRGetScreenResources(dpy, root);
+	if (!res)
+		return 1;
+
+	for (i = 0; i < res->noutput; ++i) {
+		XRROutputInfo *output_info;
+		int j, np;
+
+		output_info = XRRGetOutputInfo(dpy, res, res->outputs[i]);
+		if (!output_info)
+			continue;
+
+		if (output_info->connection != RR_Connected)
+			continue;
+
+		p = XRRListOutputProperties(dpy, res->outputs[i], &np);
+		for (j = 0; j < np; ++j) {
+			if (strcmp(XGetAtomName(dpy, p[j]), "EDID"))
+				continue;
+
+			info = edid_info(dpy, res->outputs[i], p[j]);
+			if (!info) {
+				printf("No EDID info for output %s\n", output_info->name);
+				break;
+			}
+
+			printf("%s\n"
+			       "\tModel  : %s\n"
+			       "\tS/N    : %s\n"
+			       "\tExtra  : %s\n"
+			       "\n",
+			       output_info->name,
+			       info->dsc_product_name,
+			       info->dsc_serial_number,
+			       info->dsc_string);
+			break;
+		}
+	}
+
+	return 0;
+}
+
 /**
  * Local Variables:
  *  indent-tabs-mode: t

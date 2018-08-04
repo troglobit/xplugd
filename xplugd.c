@@ -84,11 +84,12 @@ static int error_handler(void)
 
 static int usage(int status)
 {
-	printf("Usage: %s [OPTIONS] [FILE]\n\n"
+	printf("Usage: %s [-hnpsv] [-l LEVEL] [FILE]\n\n"
 	       "Options:\n"
 	       "  -h        Print this help text and exit\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
 	       "  -n        Run in foreground, do not fork to background\n"
+	       "  -p        Probe currently connected outputs and output EDID info.\n"
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n"
 	       "\n"
@@ -127,10 +128,11 @@ int main(int argc, char *argv[])
 	int background = 1;
 	int log_opts = LOG_CONS | LOG_PID;
 	int logcons = 0;
+	int mode = 0;
 	int c;
 
 	prognm = progname(argv[0]);
-	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
+	while ((c = getopt(argc, argv, "hl:npsv")) != EOF) {
 		switch (c) {
 		case 'h':
 			return usage(0);
@@ -142,6 +144,10 @@ int main(int argc, char *argv[])
 		case 'n':
 			background = 0;
 			logcons++;
+			break;
+
+		case 'p':
+			mode = 1;
 			break;
 
 		case 's':
@@ -156,18 +162,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	dpy = XOpenDisplay(NULL);
+	if (dpy == NULL) {
+		fprintf(stderr, "Cannot open display\n");
+		exit(1);
+	}
+
+	if (mode)
+		return randr_probe(dpy);
+
 	if (optind < argc)
 		arg = argv[optind];
 
 	cmd = rcfile(arg);
 	if (!cmd)
 		return usage(1);
-
-	dpy = XOpenDisplay(NULL);
-	if (dpy == NULL) {
-		fprintf(stderr, "Cannot open display\n");
-		exit(1);
-	}
 
 	if (background) {
 		if (daemon(0, 0)) {
