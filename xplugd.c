@@ -104,12 +104,14 @@ static char *progname(char *arg0)
 
 int main(int argc, char *argv[])
 {
-	int c, log_opts = LOG_CONS | LOG_PID;
-	int background = 1, logcons = 0;
-	char *arg = NULL;
-	uid_t uid;
-	XEvent ev;
 	Display *dpy;
+	XEvent ev;
+	uid_t uid;
+	char *arg = NULL;
+	int background = 1;
+	int log_opts = LOG_CONS | LOG_PID;
+	int logcons = 0;
+	int c;
 
 	prognm = progname(argv[0]);
 	while ((c = getopt(argc, argv, "hl:nsv")) != EOF) {
@@ -145,12 +147,14 @@ int main(int argc, char *argv[])
 	if (!cmd)
 		return usage(1);
 
-	if (((uid = getuid()) == 0) || uid != geteuid()) {
+	uid = getuid();
+	if (uid == 0 || uid != geteuid()) {
 		fprintf(stderr, "%s may not run as root\n", prognm);
 		exit(1);
 	}
 
-	if ((dpy = XOpenDisplay(NULL)) == NULL) {
+	dpy = XOpenDisplay(NULL);
+	if (dpy == NULL) {
 		fprintf(stderr, "Cannot open display\n");
 		exit(1);
 	}
