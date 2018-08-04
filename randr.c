@@ -25,81 +25,85 @@
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
-static int get_monitor_name(const char *name, Display *display, XRRScreenResources *res, char *monitor_name, size_t len)
+static struct monitor_info *edid_info(Display *dpy, XID output, Atom prop)
+{
+	unsigned long nitems, bytes_after;
+	unsigned char *data;
+	Atom actual_type;
+	int actual_format;
+
+	XRRGetOutputProperty(dpy, output, prop, 0, 128, False, False,
+			     AnyPropertyType, &actual_type, &actual_format,
+			     &nitems, &bytes_after, &data);
+
+	if (nitems < 128) {
+		syslog(LOG_INFO,
+		       "Not enough EDID data found.  Need at least 128 bytes, got %lu bytes", nitems);
+		return NULL;
+	}
+
+	return edid_decode(data);
+}
+
+static void edid_desc(Display *dpy, XRRScreenResources *res, const char *output, char *buf, size_t len)
 {
 	struct monitor_info *info = NULL;
-	int i, j, np;
 	Atom *p;
+	int i;
 
 	for (i = 0; i < res->noutput; ++i) {
-		XRROutputInfo *output_info = XRRGetOutputInfo(display, res,
-							      res->outputs[i]);
+		XRROutputInfo *output_info;
+		int j, np;
 
+		output_info = XRRGetOutputInfo(dpy, res, res->outputs[i]);
 		if (!output_info)
 			continue;
 
 		if (output_info->connection != RR_Connected)
 			continue;
 
-		if (strcmp(output_info->name, name)) {
+		if (strcmp(output_info->name, output))
 			continue;
-		} else {
-			p = XRRListOutputProperties(display, res->outputs[i], &np);
-			for (j = 0; j < np; ++j) {
-				unsigned char *prop;
-				int actual_format;
-				unsigned long nitems, bytes_after;
-				Atom actual_type;
 
-				XRRGetOutputProperty(display, res->outputs[i], p[j], 0, 128,
-						     False, False, AnyPropertyType, &actual_type, &actual_format,
-						     &nitems, &bytes_after, &prop);
+		p = XRRListOutputProperties(dpy, res->outputs[i], &np);
+		for (j = 0; j < np; ++j) {
+			if (strcmp(XGetAtomName(dpy, p[j]), "EDID"))
+				continue;
 
-				if (!strcmp(XGetAtomName(display, p[j]), "EDID")) {
-					if (nitems >= 128) {
-						info = edid_decode(prop);
-					} else {
-						syslog(LOG_INFO,
-						       "Not enough EDID data found. Need at least 128 bytes, got %lu bytes",
-						       nitems);
-					}
-					break;
-				}
-			}
-			break;
+			info = edid_info(dpy, res->outputs[i], p[j]);
 		}
+		break;
 	}
 
 	if (!info) {
 		syslog(LOG_INFO, "Failed decoding EDID data: %s", strerror(errno));
-		return -1;
+		return;
 	}
 
-	syslog(LOG_DEBUG, "MODEL: %s", info->dsc_product_name);
-	strncpy(monitor_name, info->dsc_product_name, len);
+	syslog(LOG_DEBUG, "MODEL: %s S/N: %s EXTRA: %s", info->dsc_product_name,
+	       info->dsc_serial_number, info->dsc_string);
+	strncpy(buf, info->dsc_product_name, len);
 	free(info);
-
-	return 0;
 }
 
 static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 {
-	char msg[MSG_LEN];
 	static char old_msg[MSG_LEN] = "";
+	XRRScreenResources *res;
 	XRROutputInfo *info;
-	XRRScreenResources *resources;
-	char monitor_name[14] = { 0 };
+	char desc[14] = { 0 };
+	char msg[MSG_LEN];
 
-	resources = XRRGetScreenResources(ev->display, ev->window);
-	if (!resources) {
+	res = XRRGetScreenResources(ev->display, ev->window);
+	if (!res) {
 		syslog(LOG_ERR, "Could not get screen resources");
 		return;
 	}
 
-	info = XRRGetOutputInfo(ev->display, resources, ev->output);
+	info = XRRGetOutputInfo(ev->display, res, ev->output);
 	if (!info) {
 		syslog(LOG_ERR, "Could not get output info");
-		XRRFreeScreenResources(resources);
+		XRRFreeScreenResources(res);
 		return;
 	}
 
@@ -122,7 +126,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 
 			syslog(LOG_DEBUG, "CRTC: %lu", info->crtc);
 
-			crtc = XRRGetCrtcInfo(dpy, resources, info->crtc);
+			crtc = XRRGetCrtcInfo(dpy, res, info->crtc);
 			if (crtc) {
 				syslog(LOG_DEBUG, "Size: %dx%d", crtc->width, crtc->height);
 				XRRFreeCrtcInfo(crtc);
@@ -131,12 +135,12 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 	}
 
 	if (!strcmp(con_actions[info->connection], "connected"))
-		get_monitor_name(info->name, dpy, resources, monitor_name, sizeof(monitor_name));
+		edid_desc(dpy, res, info->name, desc, sizeof(desc));
 
-	exec("display", info->name, con_actions[info->connection], monitor_name);
+	exec("display", info->name, con_actions[info->connection], desc);
  done:
 	XRRFreeOutputInfo(info);
-	XRRFreeScreenResources(resources);
+	XRRFreeScreenResources(res);
 }
 
 int randr_init(Display *dpy)
