@@ -123,7 +123,6 @@ int main(int argc, char *argv[])
 {
 	Display *dpy;
 	XEvent ev;
-	uid_t uid;
 	char *arg = NULL;
 	int background = 1;
 	int log_opts = LOG_CONS | LOG_PID;
@@ -163,12 +162,6 @@ int main(int argc, char *argv[])
 	cmd = rcfile(arg);
 	if (!cmd)
 		return usage(1);
-
-	uid = getuid();
-	if (uid == 0 || uid != geteuid()) {
-		fprintf(stderr, "%s may not run as root\n", prognm);
-		exit(1);
-	}
 
 	dpy = XOpenDisplay(NULL);
 	if (dpy == NULL) {
