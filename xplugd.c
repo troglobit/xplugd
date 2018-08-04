@@ -32,13 +32,30 @@ char *prognm;
 
 static char *rcfile(char *arg)
 {
-	char *rc;
 	glob_t gl;
+	char *rc;
+	int flags = GLOB_ERR;
 
 	if (!arg)
 		arg = XPLUGRC;
 
-	if (glob(arg, GLOB_TILDE, NULL, &gl))
+#ifdef GLOB_TILDES
+	/* E.g. musl libc < 1.1.21 does not have this GNU LIBC extension  */
+	flags |= GLOB_TILDE;
+#else
+	/* Simple homegrown replacement that at least handles leading ~/ */
+	if (!strncmp(arg, "~/", 2)) {
+		const char *home;
+
+		home = getenv("HOME");
+		if (home) {
+			memmove(arg + strlen(home), arg, strlen(arg));
+			memcpy(arg, home, strlen(home));
+		}
+	}
+#endif
+
+	if (glob(arg, flags, NULL, &gl))
 		return NULL;
 
 	if (gl.gl_pathc < 1)
