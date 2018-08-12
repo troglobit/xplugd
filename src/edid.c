@@ -22,12 +22,92 @@
 
 /* Author: Soren Sandmann <sandmann@redhat.com> */
 
+#include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
 #include "edid.h"
+
+#define TAB_LEN 8
+#define KEYWORD_LEN 13 // Max length of longest keyword (Currently Aspect Ratio)
+
+/* TODO: Turn these print_edid_* functions into macros? Horrible code duplication! :/ */
+int print_edid_heading(const char *prefix, const char *data, const char *postfix, int level)
+{
+	if (data) {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%s%s%s",
+		       prefix, (strlen(data) > 0) ? data : "N/A", postfix);
+	}
+	else {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s%s%s", KEYWORD_LEN,
+		       prefix, "N/A",  postfix);
+	}
+	return 0;
+}
+
+int print_edid_str(const char *prefix, const char *data, const char *postfix, int level)
+{
+	if (data) {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, (strlen(data) > 0) ? data : "N/A", postfix);
+	}
+	else {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, "N/A",  postfix);
+	}
+	return 0;
+}
+
+int print_edid_bool(const char *prefix, int data, const char *postfix, int level)
+{
+	if (data) {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, (data ? "Yes" : "No"), postfix);
+	}
+	else {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, "N/A",  postfix);
+	}
+	return 0;
+}
+
+int print_edid_integer(const char *prefix, int data, const char *postfix, int level)
+{
+	if (data && data > 0) {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %d%s", KEYWORD_LEN,
+		       prefix, data,  postfix);
+	}
+	else {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, "N/A",  postfix);
+	}
+	return 0;
+}
+
+int print_edid_double(const char *prefix, double data, const char *postfix, int level)
+{
+	if (data && data > 0) {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %G%s", KEYWORD_LEN,
+		       prefix, data,  postfix);
+	}
+	else {
+		printf("%-*s", (level * TAB_LEN), "");
+		printf("%-*s: %s%s", KEYWORD_LEN,
+		       prefix, "N/A",  postfix);
+	}
+	return 0;
+}
 
 static int get_bit(int in, int bit)
 {
