@@ -39,7 +39,7 @@ static char *rcfile(char *arg)
 	if (!arg)
 		arg = XPLUGRC;
 
-#ifdef GLOB_TILDES
+#ifdef GLOB_TILDE
 	/* E.g. musl libc < 1.1.21 does not have this GNU LIBC extension  */
 	flags |= GLOB_TILDE;
 #else
