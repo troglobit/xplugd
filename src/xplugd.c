@@ -46,13 +46,17 @@ static char *rcfile(char *arg)
 	/* Simple homegrown replacement that at least handles leading ~/ */
 	if (!strncmp(arg, "~/", 2)) {
 		char *home = NULL;
-		char *arg_tmp = strdup(arg);
+		char *tmp = strdup(arg);
 
 		home = getenv("HOME");
-		if (home) {
-			memmove(arg_tmp + strlen(home)-1, arg_tmp, strlen(arg_tmp));
-			memcpy(arg_tmp, home, strlen(home));
-			arg = arg_tmp;
+		if (home && tmp) {
+			memmove(tmp + strlen(home) - 1, tmp, strlen(tmp));
+			memcpy(tmp, home, strlen(home));
+			arg = tmp;
+		} else {
+			if (tmp) {
+				free(tmp);
+			}
 		}
 	}
 #endif
