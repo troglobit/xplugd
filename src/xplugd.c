@@ -26,7 +26,7 @@
 #include <glob.h>
 #include "xplugd.h"
 
-int   loglevel = LOG_NOTICE;
+int loglevel = LOG_NOTICE;
 char *cmd;
 char *prognm;
 
@@ -111,15 +111,15 @@ static int version(void)
 
 static char *progname(char *arg0)
 {
-       char *nm;
+	char *nm;
 
-       nm = strrchr(arg0, '/');
-       if (nm)
-	       nm++;
-       else
-	       nm = arg0;
+	nm = strrchr(arg0, '/');
+	if (nm)
+		nm++;
+	else
+		nm = arg0;
 
-       return nm;
+	return nm;
 }
 
 int main(int argc, char *argv[])

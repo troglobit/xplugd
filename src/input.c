@@ -30,46 +30,46 @@
 #define UINT_MAX_STRING EXPAND_STRINGIFY(UINT_MAX)
 
 struct pair {
-    int key;
-    char * value;
+	int key;
+	char *value;
 };
 
 const struct pair device_types[] = {
-    T(XIMasterPointer),
-    T(XIMasterKeyboard),
-    { XISlavePointer,  "pointer" },
-    { XISlaveKeyboard, "keyboard" },
-    T(XIFloatingSlave),
-    T_END
+	T(XIMasterPointer),
+	T(XIMasterKeyboard),
+	{XISlavePointer, "pointer"},
+	{XISlaveKeyboard, "keyboard"},
+	T(XIFloatingSlave),
+	T_END
 };
 
 const struct pair changes[] = {
-    T(XIMasterAdded),
-    T(XIMasterRemoved),
-    T(XISlaveAdded),
-    T(XISlaveRemoved),
-    T(XISlaveAttached),
-    T(XISlaveDetached),
-    { XIDeviceEnabled,  "connected"    },
-    { XIDeviceDisabled, "disconnected" },
-    T_END
+	T(XIMasterAdded),
+	T(XIMasterRemoved),
+	T(XISlaveAdded),
+	T(XISlaveRemoved),
+	T(XISlaveAttached),
+	T(XISlaveDetached),
+	{XIDeviceEnabled, "connected"},
+	{XIDeviceDisabled, "disconnected"},
+	T_END
 };
 
 static int xi_opcode = -1;
 
 static const struct pair *map(int key, const struct pair *table, bool strict)
 {
-    if (!table)
-	    return NULL;
+	if (!table)
+		return NULL;
 
-    while (table->value) {
-	    if ((!strict && (table->key & key)) || (table->key == key))
-		    return table;
+	while (table->value) {
+		if ((!strict && (table->key & key)) || (table->key == key))
+			return table;
 
-	    table++;
-    }
+		table++;
+	}
 
-    return NULL;
+	return NULL;
 }
 
 static int handle_device(int id, int type, int flags, char *name)
@@ -100,23 +100,23 @@ static int handle_device(int id, int type, int flags, char *name)
 
 static char *get_device_name(Display *display, int deviceid)
 {
-        XIDeviceInfo *info;
-        int i, num_devices;
-        char *name = NULL;
+	XIDeviceInfo *info;
+	int i, num_devices;
+	char *name = NULL;
 
-        info = XIQueryDevice(display, XIAllDevices, &num_devices);
+	info = XIQueryDevice(display, XIAllDevices, &num_devices);
 	if (!info)
 		return NULL;
 
-        for (i = 0; i < num_devices; i++) {
+	for (i = 0; i < num_devices; i++) {
 		if (info[i].deviceid == deviceid) {
 			name = strdup(info[i].name);
 			break;
 		}
-        }
-        XIFreeDeviceInfo(info);
+	}
+	XIFreeDeviceInfo(info);
 
-        return name;
+	return name;
 }
 
 static void handle_event(XIHierarchyEvent *event)
@@ -155,7 +155,7 @@ int input_init(Display *dpy)
 
 	mask.deviceid = XIAllDevices;
 	mask.mask_len = XIMaskLen(XI_LASTEVENT);
-	mask.mask     = calloc(mask.mask_len, sizeof(char));
+	mask.mask = calloc(mask.mask_len, sizeof(char));
 	if (!mask.mask) {
 		syslog(LOG_ERR, "Failed initializing X input module: %s", strerror(errno));
 		exit(1);

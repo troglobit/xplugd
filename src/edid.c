@@ -38,14 +38,12 @@ int print_edid_heading(const char *prefix, const char *data, const char *postfix
 {
 	if (data) {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%s%s%s",
-		       prefix, (strlen(data) > 0) ? data : "N/A", postfix);
-	}
-	else {
+		printf("%s%s%s", prefix, (strlen(data) > 0) ? data : "N/A", postfix);
+	} else {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s%s%s", KEYWORD_LEN,
-		       prefix, "N/A",  postfix);
+		printf("%-*s%s%s", KEYWORD_LEN, prefix, "N/A", postfix);
 	}
+
 	return 0;
 }
 
@@ -53,14 +51,12 @@ int print_edid_str(const char *prefix, const char *data, const char *postfix, in
 {
 	if (data) {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, (strlen(data) > 0) ? data : "N/A", postfix);
-	}
-	else {
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, (strlen(data) > 0) ? data : "N/A", postfix);
+	} else {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, "N/A",  postfix);
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
 	}
+
 	return 0;
 }
 
@@ -68,14 +64,12 @@ int print_edid_bool(const char *prefix, int data, const char *postfix, int level
 {
 	if (data) {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, (data ? "Yes" : "No"), postfix);
-	}
-	else {
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, (data ? "Yes" : "No"), postfix);
+	} else {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, "N/A",  postfix);
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
 	}
+
 	return 0;
 }
 
@@ -83,14 +77,12 @@ int print_edid_integer(const char *prefix, int data, const char *postfix, int le
 {
 	if (data && data > 0) {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %d%s", KEYWORD_LEN,
-		       prefix, data,  postfix);
-	}
-	else {
+		printf("%-*s: %d%s", KEYWORD_LEN, prefix, data, postfix);
+	} else {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, "N/A",  postfix);
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
 	}
+
 	return 0;
 }
 
@@ -98,14 +90,12 @@ int print_edid_double(const char *prefix, double data, const char *postfix, int 
 {
 	if (data && data > 0) {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %G%s", KEYWORD_LEN,
-		       prefix, data,  postfix);
-	}
-	else {
+		printf("%-*s: %G%s", KEYWORD_LEN, prefix, data, postfix);
+	} else {
 		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN,
-		       prefix, "N/A",  postfix);
+		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
 	}
+
 	return 0;
 }
 
@@ -287,6 +277,7 @@ static int decode_display_parameters(const unsigned char *edid, struct monitor_i
 
 	/* FIXME: In 1.3 this indicates whether the monitor accepts GTF */
 	info->continuous_frequency = get_bit(edid[0x18], 0);
+
 	return 1;
 }
 
@@ -363,6 +354,7 @@ static int decode_established_timings(const unsigned char *edid, struct monitor_
 				info->established[idx++] = established[i][j];
 		}
 	}
+
 	return 1;
 }
 
@@ -472,20 +464,30 @@ static void decode_detailed_timing(const unsigned char *timing, struct detailed_
 		FOUR_WAY_INTERLEAVED, SIDE_BY_SIDE
 	};
 
-	detailed->pixel_clock = (timing[0x00] | timing[0x01] << 8) * 10000;
-	detailed->h_addr = timing[0x02] | ((timing[0x04] & 0xf0) << 4);
-	detailed->h_blank = timing[0x03] | ((timing[0x04] & 0x0f) << 8);
-	detailed->v_addr = timing[0x05] | ((timing[0x07] & 0xf0) << 4);
-	detailed->v_blank = timing[0x06] | ((timing[0x07] & 0x0f) << 8);
-	detailed->h_front_porch = timing[0x08] | get_bits(timing[0x0b], 6, 7) << 8;
-	detailed->h_sync = timing[0x09] | get_bits(timing[0x0b], 4, 5) << 8;
-	detailed->v_front_porch = get_bits(timing[0x0a], 4, 7) | get_bits(timing[0x0b], 2, 3) << 4;
-	detailed->v_sync = get_bits(timing[0x0a], 0, 3) | get_bits(timing[0x0b], 0, 1) << 4;
-	detailed->width_mm = timing[0x0c] | get_bits(timing[0x0e], 4, 7) << 8;
-	detailed->height_mm = timing[0x0d] | get_bits(timing[0x0e], 0, 3) << 8;
+	detailed->pixel_clock = (timing[0x00] |
+				 timing[0x01] << 8) * 10000;
+	detailed->h_addr = (timing[0x02] |
+			    ((timing[0x04] & 0xf0) << 4));
+	detailed->h_blank = (timing[0x03] |
+			     ((timing[0x04] & 0x0f) << 8));
+	detailed->v_addr = (timing[0x05] |
+			    ((timing[0x07] & 0xf0) << 4));
+	detailed->v_blank = (timing[0x06] |
+			     ((timing[0x07] & 0x0f) << 8));
+	detailed->h_front_porch = (timing[0x08] |
+				   get_bits(timing[0x0b], 6, 7) << 8);
+	detailed->h_sync = (timing[0x09] |
+			    get_bits(timing[0x0b], 4, 5) << 8);
+	detailed->v_front_porch = (get_bits(timing[0x0a], 4, 7) |
+				   get_bits(timing[0x0b], 2, 3) << 4);
+	detailed->v_sync = (get_bits(timing[0x0a], 0, 3) |
+			    get_bits(timing[0x0b], 0, 1) << 4);
+	detailed->width_mm = (timing[0x0c] |
+			      get_bits(timing[0x0e], 4, 7) << 8);
+	detailed->height_mm = (timing[0x0d] |
+			       get_bits(timing[0x0e], 0, 3) << 8);
 	detailed->right_border = timing[0x0f];
 	detailed->top_border = timing[0x10];
-
 	detailed->interlaced = get_bit(timing[0x11], 7);
 
 	/* Stereo */
@@ -555,6 +557,7 @@ struct monitor_info *edid_decode(const unsigned char *edid)
 	}
 
 	struct monitor_info *info;
+
 	info = calloc(1, sizeof(struct monitor_info));
 	if (!info)
 		return NULL;
@@ -590,6 +593,7 @@ struct monitor_info *edid_decode(const unsigned char *edid)
 error:
 	free(info);
 	errno = ENOENT;
+
 	return NULL;
 }
 

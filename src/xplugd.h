@@ -44,7 +44,7 @@
 #define MSG_LEN 128
 #define XPLUGRC "~/.xplugrc"
 
-extern int   loglevel;
+extern int loglevel;
 extern char *cmd;
 extern char *prognm;
 

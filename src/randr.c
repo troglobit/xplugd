@@ -50,12 +50,10 @@ static struct monitor_info *edid_info(Display *dpy, XID output, Atom prop)
 	int actual_format;
 
 	XRRGetOutputProperty(dpy, output, prop, 0, 128, False, False,
-			     AnyPropertyType, &actual_type, &actual_format,
-			     &nitems, &bytes_after, &data);
+			     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &data);
 
 	if (nitems < 128) {
-		syslog(LOG_INFO,
-		       "Not enough EDID data found.  Need at least 128 bytes, got %lu bytes", nitems);
+		syslog(LOG_INFO, "Not enough EDID data found.  Need at least 128 bytes, got %lu bytes", nitems);
 		return NULL;
 	}
 
@@ -97,8 +95,8 @@ static void edid_desc(Display *dpy, XRRScreenResources *res, const char *output,
 		return;
 	}
 
-	syslog(LOG_DEBUG, "MODEL: %s S/N: %s EXTRA: %s", info->dsc_product_name,
-	       info->dsc_serial_number, info->dsc_string);
+	syslog(LOG_DEBUG, "MODEL: %s S/N: %s EXTRA: %s",
+	       info->dsc_product_name, info->dsc_serial_number, info->dsc_string);
 	strncpy(buf, info->dsc_product_name, len);
 	free(info);
 }
@@ -155,7 +153,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 		edid_desc(dpy, res, info->name, desc, sizeof(desc));
 
 	exec("display", info->name, con_actions[info->connection], desc);
- done:
+done:
 	XRRFreeOutputInfo(info);
 	XRRFreeScreenResources(res);
 }
@@ -236,8 +234,8 @@ int randr_probe(Display *dpy)
 			}
 
 			char tmp[10];
-			snprintf(tmp, sizeof(tmp), "%d.%d",
-				 info->major_version, info->minor_version);
+
+			snprintf(tmp, sizeof(tmp), "%d.%d", info->major_version, info->minor_version);
 			print_edid_str("EDID Version", tmp, "\n", 1);
 			break;
 		}
