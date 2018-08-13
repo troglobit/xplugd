@@ -79,7 +79,7 @@ static int loglvl(char *level)
 	return atoi(level);
 }
 
-static int error_handler(Display *display __attribute__ ((unused)))
+static int error_handler(Display *display)
 {
 	exit(1);
 }
