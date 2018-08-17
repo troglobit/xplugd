@@ -26,6 +26,22 @@
 
 static char *con_actions[] = { "connected", "disconnected", "unknown" };
 
+static char color_type_names[4][16] = {
+	"Undefined",
+	"Monochrome",
+	"RGB",
+	"Other"
+};
+
+static char iface_type_names[6][16] = {
+	"Undefined",
+	"DVI",
+	"HDMI-A",
+	"HDMI-B",
+	"MDDI",
+	"Display Port"
+};
+
 static struct monitor_info *edid_info(Display *dpy, XID output, Atom prop)
 {
 	unsigned long nitems, bytes_after;
@@ -34,12 +50,10 @@ static struct monitor_info *edid_info(Display *dpy, XID output, Atom prop)
 	int actual_format;
 
 	XRRGetOutputProperty(dpy, output, prop, 0, 128, False, False,
-			     AnyPropertyType, &actual_type, &actual_format,
-			     &nitems, &bytes_after, &data);
+			     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &data);
 
 	if (nitems < 128) {
-		syslog(LOG_INFO,
-		       "Not enough EDID data found.  Need at least 128 bytes, got %lu bytes", nitems);
+		syslog(LOG_INFO, "Not enough EDID data found.  Need at least 128 bytes, got %lu bytes", nitems);
 		return NULL;
 	}
 
@@ -81,8 +95,8 @@ static void edid_desc(Display *dpy, XRRScreenResources *res, const char *output,
 		return;
 	}
 
-	syslog(LOG_DEBUG, "MODEL: %s S/N: %s EXTRA: %s", info->dsc_product_name,
-	       info->dsc_serial_number, info->dsc_string);
+	syslog(LOG_DEBUG, "MODEL: %s S/N: %s EXTRA: %s",
+	       info->dsc_product_name, info->dsc_serial_number, info->dsc_string);
 	strncpy(buf, info->dsc_product_name, len);
 	free(info);
 }
@@ -139,7 +153,7 @@ static void handle_event(Display *dpy, XRROutputChangeNotifyEvent *ev)
 		edid_desc(dpy, res, info->name, desc, sizeof(desc));
 
 	exec("display", info->name, con_actions[info->connection], desc);
- done:
+done:
 	XRRFreeOutputInfo(info);
 	XRRFreeScreenResources(res);
 }
@@ -191,15 +205,38 @@ int randr_probe(Display *dpy)
 				break;
 			}
 
-			printf("%s\n"
-			       "\tModel  : %s\n"
-			       "\tS/N    : %s\n"
-			       "\tExtra  : %s\n"
-			       "\n",
-			       output_info->name,
-			       info->dsc_product_name,
-			       info->dsc_serial_number,
-			       info->dsc_string);
+			print_edid_heading("", output_info->name, "\n", 0);
+			print_edid_str("Model", info->dsc_product_name, "\n", 1);
+			print_edid_str("Serial Nr.", info->dsc_serial_number, "\n", 1);
+			print_edid_integer("Width", info->width_mm, "\n", 1);
+			print_edid_integer("Height", info->height_mm, "\n", 1);
+			print_edid_double("Aspect Ratio", info->aspect_ratio, "\n", 1);
+			print_edid_double("Gamma", info->gamma, "\n", 1);
+			print_edid_integer("Prod. Year", info->production_year, "\n", 1);
+			print_edid_integer("Prod. Week", info->production_week, "\n", 1);
+			print_edid_integer("Model Year", info->model_year, "\n", 1);
+			print_edid_str("Extra", info->dsc_string, "\n", 1);
+
+			print_edid_heading("", "DPMS", "\n", 1);
+			print_edid_bool("Standby", info->standby, "\n", 2);
+			print_edid_bool("Suspend", info->suspend, "\n", 2);
+			print_edid_bool("Active Off", info->active_off, "\n", 2);
+
+			if (info->is_digital) {
+				print_edid_str("Interface", iface_type_names[info->digital.interface], "\n", 1);
+				print_edid_heading("", "Display Type (digital)", "\n", 1);
+				print_edid_bool("RGB 4:4:4", info->digital.rgb444, "\n", 2);
+				print_edid_bool("YCrCb 4:4:4", info->digital.ycrcb444, "\n", 2);
+				print_edid_bool("YCrCb 4:2:2", info->digital.ycrcb422, "\n", 2);
+			} else {
+				print_edid_heading("", "Display Type (analog)", "\n", 1);
+				print_edid_str("", color_type_names[info->analog.color_type], "\n", 2);
+			}
+
+			char tmp[10];
+
+			snprintf(tmp, sizeof(tmp), "%d.%d", info->major_version, info->minor_version);
+			print_edid_str("EDID Version", tmp, "\n", 1);
 			break;
 		}
 	}

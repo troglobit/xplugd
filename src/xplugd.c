@@ -26,7 +26,7 @@
 #include <glob.h>
 #include "xplugd.h"
 
-int   loglevel = LOG_NOTICE;
+int loglevel = LOG_NOTICE;
 char *cmd;
 char *prognm;
 
@@ -39,18 +39,24 @@ static char *rcfile(char *arg)
 	if (!arg)
 		arg = XPLUGRC;
 
-#ifdef GLOB_TILDES
+#ifdef GLOB_TILDE
 	/* E.g. musl libc < 1.1.21 does not have this GNU LIBC extension  */
 	flags |= GLOB_TILDE;
 #else
 	/* Simple homegrown replacement that at least handles leading ~/ */
 	if (!strncmp(arg, "~/", 2)) {
-		const char *home;
+		char *home = NULL;
+		char *tmp = strdup(arg);
 
 		home = getenv("HOME");
-		if (home) {
-			memmove(arg + strlen(home), arg, strlen(arg));
-			memcpy(arg, home, strlen(home));
+		if (home && tmp) {
+			memmove(tmp + strlen(home) - 1, tmp, strlen(tmp));
+			memcpy(tmp, home, strlen(home));
+			arg = tmp;
+		} else {
+			if (tmp) {
+				free(tmp);
+			}
 		}
 	}
 #endif
@@ -77,7 +83,7 @@ static int loglvl(char *level)
 	return atoi(level);
 }
 
-static int error_handler(void)
+static int error_handler(Display *display)
 {
 	exit(1);
 }
@@ -109,15 +115,15 @@ static int version(void)
 
 static char *progname(char *arg0)
 {
-       char *nm;
+	char *nm;
 
-       nm = strrchr(arg0, '/');
-       if (nm)
-	       nm++;
-       else
-	       nm = arg0;
+	nm = strrchr(arg0, '/');
+	if (nm)
+		nm++;
+	else
+		nm = arg0;
 
-       return nm;
+	return nm;
 }
 
 int main(int argc, char *argv[])

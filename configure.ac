@@ -11,6 +11,7 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 
 # Check for required libraries
+AC_SEARCH_LIBS([pow], [m])
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([Xrandr], [xrandr])
 PKG_CHECK_MODULES([Xi], [xi])
