@@ -153,7 +153,8 @@ struct monitor_info {
 	struct timing established[24];	/* Terminated by 0x0x0 */
 	struct timing standard[8];
 
-	/* If monitor has a preferred mode, it is the first one (whether it has,
+	/*
+	 * If monitor has a preferred mode, it is the first one (whether it has,
 	 * is determined by the preferred_timing_includes bit.
 	 */
 	int n_detailed_timings;
