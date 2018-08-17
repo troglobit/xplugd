@@ -464,31 +464,20 @@ static void decode_detailed_timing(const unsigned char *timing, struct detailed_
 		FOUR_WAY_INTERLEAVED, SIDE_BY_SIDE
 	};
 
-	detailed->pixel_clock = (timing[0x00] |
-				 timing[0x01] << 8) * 10000;
-	detailed->h_addr = (timing[0x02] |
-			    ((timing[0x04] & 0xf0) << 4));
-	detailed->h_blank = (timing[0x03] |
-			     ((timing[0x04] & 0x0f) << 8));
-	detailed->v_addr = (timing[0x05] |
-			    ((timing[0x07] & 0xf0) << 4));
-	detailed->v_blank = (timing[0x06] |
-			     ((timing[0x07] & 0x0f) << 8));
-	detailed->h_front_porch = (timing[0x08] |
-				   get_bits(timing[0x0b], 6, 7) << 8);
-	detailed->h_sync = (timing[0x09] |
-			    get_bits(timing[0x0b], 4, 5) << 8);
-	detailed->v_front_porch = (get_bits(timing[0x0a], 4, 7) |
-				   get_bits(timing[0x0b], 2, 3) << 4);
-	detailed->v_sync = (get_bits(timing[0x0a], 0, 3) |
-			    get_bits(timing[0x0b], 0, 1) << 4);
-	detailed->width_mm = (timing[0x0c] |
-			      get_bits(timing[0x0e], 4, 7) << 8);
-	detailed->height_mm = (timing[0x0d] |
-			       get_bits(timing[0x0e], 0, 3) << 8);
-	detailed->right_border = timing[0x0f];
-	detailed->top_border = timing[0x10];
-	detailed->interlaced = get_bit(timing[0x11], 7);
+	detailed->pixel_clock	= (timing[0x00] | timing[0x01] << 8) * 10000;
+	detailed->h_addr	= timing[0x02]	| ((timing[0x04] & 0xf0) << 4);
+	detailed->h_blank	= timing[0x03]	| ((timing[0x04] & 0x0f) << 8);
+	detailed->v_addr	= timing[0x05]	| ((timing[0x07] & 0xf0) << 4);
+	detailed->v_blank	= timing[0x06]	| ((timing[0x07] & 0x0f) << 8);
+	detailed->h_front_porch = timing[0x08]	| get_bits(timing[0x0b], 6, 7) << 8;
+	detailed->h_sync	= timing[0x09]	| get_bits(timing[0x0b], 4, 5) << 8;
+	detailed->v_front_porch = get_bits(timing[0x0a], 4, 7) | get_bits(timing[0x0b], 2, 3) << 4;
+	detailed->v_sync	= get_bits(timing[0x0a], 0, 3) | get_bits(timing[0x0b], 0, 1) << 4;
+	detailed->width_mm	= timing[0x0c]	| get_bits(timing[0x0e], 4, 7) << 8;
+	detailed->height_mm	= timing[0x0d]	| get_bits(timing[0x0e], 0, 3) << 8;
+	detailed->right_border	= timing[0x0f];
+	detailed->top_border	= timing[0x10];
+	detailed->interlaced	= get_bit(timing[0x11], 7);
 
 	/* Stereo */
 	bits = get_bits(timing[0x11], 5, 6) << 1 | get_bit(timing[0x11], 0);
