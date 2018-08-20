@@ -165,11 +165,6 @@ struct monitor_info {
 	char dsc_product_name[14];
 	char dsc_string[14];	/* Unspecified ASCII data */
 };
-int print_edid_heading(const char *prefix, const char *data, const char *postfix, int level);
-int print_edid_str(const char *prefix, const char *data, const char *postfix, int level);
-int print_edid_bool(const char *prefix, int data, const char *postfix, int level);
-int print_edid_integer(const char *prefix, int data, const char *postfix, int level);
-int print_edid_double(const char *prefix, double data, const char *postfix, int level);
 
 struct monitor_info *edid_decode(const unsigned char *data);
 

@@ -170,6 +170,12 @@ int randr_event(Display *dpy, XEvent *ev)
 	return 0;
 }
 
+#define NA "N/A"
+#define PRINT_STR(str)   printf("%s\n", str ? strlen(str) > 0 ? str : NA : NA)
+#define PRINT_BOOL(val)  printf("%s\n", val ? "Yes" : "No")
+#define PRINT_INT(val)   if (val > 0)   printf("%d\n", val); else printf("%s\n", NA)
+#define PRINT_FLOAT(val) if (val > 0.0) printf("%G\n", val); else printf("%s\n", NA)
+
 int randr_probe(Display *dpy)
 {
 	struct monitor_info *info;
@@ -205,38 +211,35 @@ int randr_probe(Display *dpy)
 				break;
 			}
 
-			print_edid_heading("", output_info->name, "\n", 0);
-			print_edid_str("Model", info->dsc_product_name, "\n", 1);
-			print_edid_str("Serial Nr.", info->dsc_serial_number, "\n", 1);
-			print_edid_integer("Width", info->width_mm, "\n", 1);
-			print_edid_integer("Height", info->height_mm, "\n", 1);
-			print_edid_double("Aspect Ratio", info->aspect_ratio, "\n", 1);
-			print_edid_double("Gamma", info->gamma, "\n", 1);
-			print_edid_integer("Prod. Year", info->production_year, "\n", 1);
-			print_edid_integer("Prod. Week", info->production_week, "\n", 1);
-			print_edid_integer("Model Year", info->model_year, "\n", 1);
-			print_edid_str("Extra", info->dsc_string, "\n", 1);
+			printf("%s\n", output_info->name);
+			printf("   Model          : "); PRINT_STR(info->dsc_product_name);
+			printf("   Serial Nr.     : "); PRINT_STR(info->dsc_serial_number);
+			printf("   Width          : "); PRINT_INT(info->width_mm);
+			printf("   Height         : "); PRINT_INT(info->height_mm);
+			printf("   Aspect Ratio   : "); PRINT_FLOAT(info->aspect_ratio);
+			printf("   Gamma          : "); PRINT_FLOAT(info->gamma);
+			printf("   Prod. Year     : "); PRINT_INT(info->production_year);
+			printf("   Prod. Week     : "); PRINT_INT(info->production_week);
+			printf("   Model Year     : "); PRINT_INT(info->model_year);
+			printf("   Extra          : "); PRINT_STR(info->dsc_string);
 
-			print_edid_heading("", "DPMS", "\n", 1);
-			print_edid_bool("Standby", info->standby, "\n", 2);
-			print_edid_bool("Suspend", info->suspend, "\n", 2);
-			print_edid_bool("Active Off", info->active_off, "\n", 2);
+			printf("   DPMS\n");
+			printf("      Standby     : "); PRINT_BOOL(info->standby);
+			printf("      Suspend     : "); PRINT_BOOL(info->suspend);
+			printf("      Active Off  : "); PRINT_BOOL(info->active_off);
 
 			if (info->is_digital) {
-				print_edid_str("Interface", iface_type_names[info->digital.interface], "\n", 1);
-				print_edid_heading("", "Display Type (digital)", "\n", 1);
-				print_edid_bool("RGB 4:4:4", info->digital.rgb444, "\n", 2);
-				print_edid_bool("YCrCb 4:4:4", info->digital.ycrcb444, "\n", 2);
-				print_edid_bool("YCrCb 4:2:2", info->digital.ycrcb422, "\n", 2);
+				printf("   Interface      : "); PRINT_STR(iface_type_names[info->digital.interface]);
+				printf("   Display Type   : (digital)\n");
+				printf("      RGB 4:4:4   : "); PRINT_BOOL(info->digital.rgb444);
+				printf("      YCrCb 4:4:4 : "); PRINT_BOOL(info->digital.ycrcb444);
+				printf("      YCrCb 4:2:2 : "); PRINT_BOOL(info->digital.ycrcb422);
 			} else {
-				print_edid_heading("", "Display Type (analog)", "\n", 1);
-				print_edid_str("", color_type_names[info->analog.color_type], "\n", 2);
+				printf("    Display Type  : (analog)\n");
+				printf("                  : "); PRINT_STR(color_type_names[info->analog.color_type]);
 			}
 
-			char tmp[10];
-
-			snprintf(tmp, sizeof(tmp), "%d.%d", info->major_version, info->minor_version);
-			print_edid_str("EDID Version", tmp, "\n", 1);
+			printf("   EDID Version   : %d.%d\n", info->major_version, info->minor_version);
 			break;
 		}
 	}

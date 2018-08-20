@@ -33,71 +33,6 @@
 #define TAB_LEN 8
 #define KEYWORD_LEN 13 // Max length of longest keyword (Currently Aspect Ratio)
 
-/* TODO: Turn these print_edid_* functions into macros? Horrible code duplication! :/ */
-int print_edid_heading(const char *prefix, const char *data, const char *postfix, int level)
-{
-	if (data) {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%s%s%s", prefix, (strlen(data) > 0) ? data : "N/A", postfix);
-	} else {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s%s%s", KEYWORD_LEN, prefix, "N/A", postfix);
-	}
-
-	return 0;
-}
-
-int print_edid_str(const char *prefix, const char *data, const char *postfix, int level)
-{
-	if (data) {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, (strlen(data) > 0) ? data : "N/A", postfix);
-	} else {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
-	}
-
-	return 0;
-}
-
-int print_edid_bool(const char *prefix, int data, const char *postfix, int level)
-{
-	if (data) {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, (data ? "Yes" : "No"), postfix);
-	} else {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
-	}
-
-	return 0;
-}
-
-int print_edid_integer(const char *prefix, int data, const char *postfix, int level)
-{
-	if (data && data > 0) {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %d%s", KEYWORD_LEN, prefix, data, postfix);
-	} else {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
-	}
-
-	return 0;
-}
-
-int print_edid_double(const char *prefix, double data, const char *postfix, int level)
-{
-	if (data && data > 0) {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %G%s", KEYWORD_LEN, prefix, data, postfix);
-	} else {
-		printf("%-*s", (level * TAB_LEN), "");
-		printf("%-*s: %s%s", KEYWORD_LEN, prefix, "N/A", postfix);
-	}
-
-	return 0;
-}
 
 static int get_bit(int in, int bit)
 {
@@ -119,16 +54,17 @@ static int is_edid_header(const unsigned char *edid)
 	return 0;
 }
 
-static int decode_vendor_and_product_identification(const unsigned char *edid, struct monitor_info *info)
+static int decode_vendor_and_product_identification(const unsigned char *edid,
+						    struct monitor_info *info)
 {
 	int is_model_year;
 
 	/* Manufacturer Code */
-	info->manufacturer_code[0] = get_bits(edid[0x08], 2, 6);
-	info->manufacturer_code[1] = get_bits(edid[0x08], 0, 1) << 3;
+	info->manufacturer_code[0]  = get_bits(edid[0x08], 2, 6);
+	info->manufacturer_code[1]  = get_bits(edid[0x08], 0, 1) << 3;
 	info->manufacturer_code[1] |= get_bits(edid[0x09], 5, 7);
-	info->manufacturer_code[2] = get_bits(edid[0x09], 0, 4);
-	info->manufacturer_code[3] = '\0';
+	info->manufacturer_code[2]  = get_bits(edid[0x09], 0, 4);
+	info->manufacturer_code[3]  = '\0';
 
 	info->manufacturer_code[0] += 'A' - 1;
 	info->manufacturer_code[1] += 'A' - 1;
@@ -159,10 +95,10 @@ static int decode_vendor_and_product_identification(const unsigned char *edid, s
 
 	if (is_model_year) {
 		info->production_year = -1;
-		info->model_year = 1990 + edid[0x11];
+		info->model_year      = 1990 + edid[0x11];
 	} else {
 		info->production_year = 1990 + edid[0x11];
-		info->model_year = -1;
+		info->model_year      = -1;
 	}
 
 	return 1;
@@ -205,42 +141,42 @@ static int decode_display_parameters(const unsigned char *edid, struct monitor_i
 		int bits = get_bits(edid[0x14], 5, 6);
 
 		static const double levels[][3] = {
-			{0.7, 0.3, 1.0},
-			{0.714, 0.286, 1.0},
-			{1.0, 0.4, 1.4},
-			{0.7, 0.0, 0.7},
+			{ 0.7,   0.3,   1.0 },
+			{ 0.714, 0.286, 1.0 },
+			{ 1.0,   0.4,   1.4 },
+			{ 0.7,   0.0,   0.7 },
 		};
 
 		info->analog.video_signal_level = levels[bits][0];
-		info->analog.sync_signal_level = levels[bits][1];
+		info->analog.sync_signal_level  = levels[bits][1];
 		info->analog.total_signal_level = levels[bits][2];
 
-		info->analog.blank_to_black = get_bit(edid[0x14], 4);
+		info->analog.blank_to_black          = get_bit(edid[0x14], 4);
 
-		info->analog.separate_hv_sync = get_bit(edid[0x14], 3);
-		info->analog.composite_sync_on_h = get_bit(edid[0x14], 2);
+		info->analog.separate_hv_sync        = get_bit(edid[0x14], 3);
+		info->analog.composite_sync_on_h     = get_bit(edid[0x14], 2);
 		info->analog.composite_sync_on_green = get_bit(edid[0x14], 1);
 
-		info->analog.serration_on_vsync = get_bit(edid[0x14], 0);
+		info->analog.serration_on_vsync      = get_bit(edid[0x14], 0);
 	}
 
 	/* Screen Size / Aspect Ratio */
 	if (edid[0x15] == 0 && edid[0x16] == 0) {
-		info->width_mm = -1;
-		info->height_mm = -1;
+		info->width_mm     = -1;
+		info->height_mm    = -1;
 		info->aspect_ratio = -1.0;
 	} else if (edid[0x16] == 0) {
-		info->width_mm = -1;
-		info->height_mm = -1;
+		info->width_mm     = -1;
+		info->height_mm    = -1;
 		info->aspect_ratio = 100.0 / (edid[0x15] + 99);
 	} else if (edid[0x15] == 0) {
-		info->width_mm = -1;
-		info->height_mm = -1;
+		info->width_mm     = -1;
+		info->height_mm    = -1;
 		info->aspect_ratio = 100.0 / (edid[0x16] + 99);
 		info->aspect_ratio = 1 / info->aspect_ratio;	/* portrait */
 	} else {
-		info->width_mm = 10 * edid[0x15];
-		info->height_mm = 10 * edid[0x16];
+		info->width_mm     = 10 * edid[0x15];
+		info->height_mm    = 10 * edid[0x16];
 	}
 
 	/* Gamma */
@@ -250,8 +186,8 @@ static int decode_display_parameters(const unsigned char *edid, struct monitor_i
 		info->gamma = (edid[0x17] + 100.0) / 100.0;
 
 	/* Features */
-	info->standby = get_bit(edid[0x18], 7);
-	info->suspend = get_bit(edid[0x18], 6);
+	info->standby    = get_bit(edid[0x18], 7);
+	info->suspend    = get_bit(edid[0x18], 6);
 	info->active_off = get_bit(edid[0x18], 5);
 
 	if (info->is_digital) {
@@ -296,12 +232,12 @@ static double decode_fraction(int high, int low)
 
 static int decode_color_characteristics(const unsigned char *edid, struct monitor_info *info)
 {
-	info->red_x = decode_fraction(edid[0x1b], get_bits(edid[0x19], 6, 7));
-	info->red_y = decode_fraction(edid[0x1c], get_bits(edid[0x19], 5, 4));
+	info->red_x   = decode_fraction(edid[0x1b], get_bits(edid[0x19], 6, 7));
+	info->red_y   = decode_fraction(edid[0x1c], get_bits(edid[0x19], 5, 4));
 	info->green_x = decode_fraction(edid[0x1d], get_bits(edid[0x19], 2, 3));
 	info->green_y = decode_fraction(edid[0x1e], get_bits(edid[0x19], 0, 1));
-	info->blue_x = decode_fraction(edid[0x1f], get_bits(edid[0x1a], 6, 7));
-	info->blue_y = decode_fraction(edid[0x20], get_bits(edid[0x1a], 4, 5));
+	info->blue_x  = decode_fraction(edid[0x1f], get_bits(edid[0x1a], 6, 7));
+	info->blue_y  = decode_fraction(edid[0x20], get_bits(edid[0x1a], 4, 5));
 	info->white_x = decode_fraction(edid[0x21], get_bits(edid[0x1a], 2, 3));
 	info->white_y = decode_fraction(edid[0x22], get_bits(edid[0x1a], 0, 1));
 
@@ -312,34 +248,34 @@ static int decode_established_timings(const unsigned char *edid, struct monitor_
 {
 	static const struct timing established[][8] = {
 		{
-			{800, 600, 60},
-			{800, 600, 56},
-			{640, 480, 75},
-			{640, 480, 72},
-			{640, 480, 67},
-			{640, 480, 60},
-			{720, 400, 88},
-			{720, 400, 70}
+			{ 800, 600, 60 },
+			{ 800, 600, 56 },
+			{ 640, 480, 75 },
+			{ 640, 480, 72 },
+			{ 640, 480, 67 },
+			{ 640, 480, 60 },
+			{ 720, 400, 88 },
+			{ 720, 400, 70 }
 		},
 		{
-			{1280, 1024, 75},
-			{1024, 768, 75},
-			{1024, 768, 70},
-			{1024, 768, 60},
-			{1024, 768, 87},
-			{832, 624, 75},
-			{800, 600, 75},
-			{800, 600, 72}
+			{ 1280, 1024, 75 },
+			{ 1024,  768, 75 },
+			{ 1024,  768, 70 },
+			{ 1024,  768, 60 },
+			{ 1024,  768, 87 },
+			{  832,  624, 75 },
+			{  800,  600, 75 },
+			{  800,  600, 72 }
 		},
 		{
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-			{0, 0, 0},
-			{1152, 870, 75}
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{    0,   0,  0 },
+			{ 1152, 870, 75 }
 		},
 	};
 
