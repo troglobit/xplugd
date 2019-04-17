@@ -33,11 +33,16 @@ char *prognm;
 static char *rcfile(char *arg)
 {
 	glob_t gl;
-	char *rc;
+	char *rc, *config_home;
 	int flags = GLOB_ERR;
 
-	if (!arg)
+	config_home = getenv("XDG_CONFIG_HOME");
+
+	if (!arg && !config_home) {
 		arg = XPLUGRC;
+	} else {
+		arg = strcat(config_home, "/xplugrc");
+	}
 
 #ifdef GLOB_TILDE
 	/* E.g. musl libc < 1.1.21 does not have this GNU LIBC extension  */
@@ -99,7 +104,8 @@ static int usage(int status)
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n"
 	       "\n"
-	       " FILE       Optional script file argument, default ~/.xplugrc\n"
+	       " FILE       Optional script file argument, default $XDG_CONFIG_HOME/.xplugrc\n"
+	       "            If $XDG_CONFIG_HOME is not set, ~/.config is used.\n"
 	       "\n"
 	       "Copyright (C) 2012-2015  Stefan Bolte\n"
 	       "Copyright (C) 2016-2018  Joachim Nilsson\n\n"
