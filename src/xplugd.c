@@ -23,6 +23,7 @@
  */
 
 #define SYSLOG_NAMES
+#include <alloca.h>
 #include <glob.h>
 #include "xplugd.h"
 
@@ -41,20 +42,19 @@ static char *tilde_expand(char *path)
 	flags |= GLOB_TILDE;
 #else
 	/* Simple homegrown replacement that at least handles leading ~/ */
-	if (!strncmp(arg, "~/", 2)) {
-		char *home = NULL;
-		char *tmp = strdup(arg);
+	if (!strncmp(path, "~/", 2)) {
+		size_t len;
+		char *buf, *home;
 
 		home = getenv("HOME");
-		if (home && tmp) {
-			memmove(tmp + strlen(home) - 1, tmp, strlen(tmp));
-			memcpy(tmp, home, strlen(home));
-			arg = tmp;
-		} else {
-			if (tmp) {
-				free(tmp);
-			}
-		}
+		if (!home)
+			return NULL;
+
+		len = strlen(home) + strlen(path);
+		buf = alloca(len);
+
+		snprintf(buf, len, "%s/%s", home, &path[2]);
+		path = buf;
 	}
 #endif
 
