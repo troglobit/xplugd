@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.Dd Nov 13, 2017
+.Dd Apr 19, 2019
 .\" Please adjust this date whenever revising the manpage.
 .Dt XPLUGD 1 URM
 .Os
@@ -53,8 +53,13 @@ Show version information and exit
 The optional
 .Pa FILE
 argument defaults to
-.Pa ~/.xplugrc
-and is called with the following arguments:
+.Pa $XDG_CONFIG_HOME/xplugrc ,
+with fallbacks to
+.Pa ~/.config/xplugrc
+and
+.Pa ~/.xplugrc .
+The file is called as a script on plug events with the following
+arguments:
 .Bl -tag -width Ds -offset indent
 .It $1 = Ar TYPE
 One of
@@ -105,15 +110,26 @@ case "$type,$device,$status,$desc" in
 esac
 .Ed
 .Sh FILES
-.Pa ~/.xplugrc
+.Bl -tag -width $XDG_CONFIG_HOME/xplugrc -compact
+.It Pa $XDG_CONFIG_HOME/xplugrc
+Primary path
+.It Pa ~/.config/xplugrc
+Secondary path
+.It Pa ~/.xplugrc
+Fallback path, for compat with earlier releases
+.El
 .Sh SEE ALSO
-.Aq http://bitbucket.org/portix/srandrd
-.Aq https://bitbucket.org/andrew_shadura/inputplug
-.Aq https://github.com/troglobit/xplugd
+.Bl -tag -compact
+.It Aq http://bitbucket.org/portix/srandrd
+.It Aq https://bitbucket.org/andrew_shadura/inputplug
+.It Aq https://github.com/troglobit/xplugd
+.El
 .Sh AUTHORS
 .Nm
 was created by Joachim Nilsson in 2016 for use with window managers like
-.Xr awesome 1 .
+.Xr awesome 1
+and
+.Xr i3 1 .
 It would however not exist if not for the hard work of Stefan Bolte with
 .Nm srandrd
 and Andrew Shadura with
