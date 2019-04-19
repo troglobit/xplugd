@@ -33,16 +33,23 @@ char *prognm;
 static char *rcfile(char *arg)
 {
 	glob_t gl;
-	char *rc, *config_home;
+	char *rc;
 	int flags = GLOB_ERR;
 
-	config_home = getenv("XDG_CONFIG_HOME");
+	if (!arg) {
+		char *home;
 
-	if (!arg && !config_home) {
-		arg = XPLUGRC;
-	} else {
-		if (!arg)
-			arg = strcat(config_home, "/xplugrc");
+		home = getenv("XDG_CONFIG_HOME");
+		if (home) {
+			size_t len = strlen(home + 9);
+
+			arg = malloc(len);
+			if (!arg)
+				return NULL;
+
+			snprintf(arg, len, "%s/xplugrc", home);
+		} else
+			arg = XPLUGRC;
 	}
 
 #ifdef GLOB_TILDE
