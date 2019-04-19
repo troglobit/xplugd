@@ -105,7 +105,7 @@ static int usage(int status)
 	       "  -v        Show program version\n"
 	       "\n"
 	       " FILE       Optional script file argument, default $XDG_CONFIG_HOME/.xplugrc\n"
-	       "            If $XDG_CONFIG_HOME is not set, ~/.config is used.\n"
+	       "            If $XDG_CONFIG_HOME is not set xplugd reverts to ~/.xplugrc\n"
 	       "\n"
 	       "Copyright (C) 2012-2015  Stefan Bolte\n"
 	       "Copyright (C) 2016-2018  Joachim Nilsson\n\n"

@@ -42,7 +42,7 @@
 #include <X11/extensions/Xrandr.h>
 
 #define MSG_LEN 128
-#define XPLUGRC "~/.config/xplugrc"
+#define XPLUGRC "~/.xplugrc"
 
 extern int loglevel;
 extern char *cmd;
