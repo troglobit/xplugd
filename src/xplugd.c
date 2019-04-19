@@ -70,26 +70,40 @@ static char *tilde_expand(char *path)
 	return rc;
 }
 
+/*
+ * Returns the ~/ expanded path to the rc file.  If no user supplied
+ * path exists the following paths are checked:
+ *  - $XDG_CONFIG_HOME/xplugrc
+ *  - ~/.config/xplugrc
+ *  - ~/.xplugrc
+ */
 static char *rcfile(char *arg)
 {
-	if (!arg) {
-		char *home;
+	char *home;
 
-		home = getenv("XDG_CONFIG_HOME");
-		if (home) {
-			size_t len = strlen(home + 9);
+	if (arg)
+		return tilde_expand(arg);
 
-			arg = malloc(len);
-			if (!arg)
-				return NULL;
+	home = getenv("XDG_CONFIG_HOME");
+	if (home) {
+		size_t len = strlen(home) + 9;
+		char *path;
 
-			snprintf(arg, len, "%s/xplugrc", home);
-		} else {
-			arg = XPLUGRC;
-		}
+		path = malloc(len);
+		if (!path)
+			return NULL;
+
+		snprintf(path, len, "%s/xplugrc", home);
+		arg = tilde_expand(path);
 	}
 
-	return tilde_expand(arg);
+	if (!arg)
+		arg = tilde_expand(XPLUGRC);
+
+	if (!arg)
+		arg = tilde_expand(XPLUGRC_FALLBACK);
+
+	return arg;
 }
 
 static int loglvl(char *level)
@@ -118,8 +132,8 @@ static int usage(int status)
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n"
 	       "\n"
-	       " FILE       Optional script file argument, default $XDG_CONFIG_HOME/.xplugrc\n"
-	       "            If $XDG_CONFIG_HOME is not set xplugd reverts to ~/.xplugrc\n"
+	       " FILE       Optional script argument, default $XDG_CONFIG_HOME/xplugrc\n"
+	       "            Fallback also checks for ~/.config/xplugrc and ~/.xplugrc\n"
 	       "\n"
 	       "Copyright (C) 2012-2015  Stefan Bolte\n"
 	       "Copyright (C) 2016-2018  Joachim Nilsson\n\n"
