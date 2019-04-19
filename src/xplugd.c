@@ -30,27 +30,11 @@ int loglevel = LOG_NOTICE;
 char *cmd;
 char *prognm;
 
-static char *rcfile(char *arg)
+static char *tilde_expand(char *path)
 {
 	glob_t gl;
 	char *rc;
 	int flags = GLOB_ERR;
-
-	if (!arg) {
-		char *home;
-
-		home = getenv("XDG_CONFIG_HOME");
-		if (home) {
-			size_t len = strlen(home + 9);
-
-			arg = malloc(len);
-			if (!arg)
-				return NULL;
-
-			snprintf(arg, len, "%s/xplugrc", home);
-		} else
-			arg = XPLUGRC;
-	}
 
 #ifdef GLOB_TILDE
 	/* E.g. musl libc < 1.1.21 does not have this GNU LIBC extension  */
@@ -74,7 +58,7 @@ static char *rcfile(char *arg)
 	}
 #endif
 
-	if (glob(arg, flags, NULL, &gl))
+	if (glob(path, flags, NULL, &gl))
 		return NULL;
 
 	if (gl.gl_pathc < 1)
@@ -84,6 +68,28 @@ static char *rcfile(char *arg)
 	globfree(&gl);
 
 	return rc;
+}
+
+static char *rcfile(char *arg)
+{
+	if (!arg) {
+		char *home;
+
+		home = getenv("XDG_CONFIG_HOME");
+		if (home) {
+			size_t len = strlen(home + 9);
+
+			arg = malloc(len);
+			if (!arg)
+				return NULL;
+
+			snprintf(arg, len, "%s/xplugrc", home);
+		} else {
+			arg = XPLUGRC;
+		}
+	}
+
+	return tilde_expand(arg);
 }
 
 static int loglvl(char *level)
