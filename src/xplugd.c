@@ -41,7 +41,8 @@ static char *rcfile(char *arg)
 	if (!arg && !config_home) {
 		arg = XPLUGRC;
 	} else {
-		arg = strcat(config_home, "/xplugrc");
+		if (!arg)
+			arg = strcat(config_home, "/xplugrc");
 	}
 
 #ifdef GLOB_TILDE
