@@ -21,22 +21,24 @@ Usage
     -s        Use syslog, even if running in foreground, default w/o -n
     -v        Show version info and exit
     
-    FILE       Optional script file argument, default ~/.xplugrc
+    FILE       Optional script argument, default $XDG_CONFIG_HOME/xplugrc
+               Fallback also checks for ~/.config/xplugrc and ~/.xplugrc
 
-When `FILE` is omitted `xplugd` defaults to use `~/.xplugrc`.  This file
-is called as a shell script on plug events with the following arguments:
+When `FILE` is omitted `xplugd` uses `$XDG_CONFIG_HOME/xplugrc`, if that
+cannot be found `~/.config/xplugrc` is tried, and finally `~/.xplugrc`.
+The file is called as a shell script on plug events as follows:
 
-    ~/.xplugrc TYPE DEVICE STATUS ["Optional Description"]
-                |    |      |
-                |    |       `---- connected or disconnected
-                |     `----------- HDMI3, LVDS1, VGA1, etc.
-                 `---------------- keyboard, pointer, display
+    xplugrc TYPE DEVICE STATUS ["Optional Description"]
+             |    |      |
+             |    |       `---- connected or disconnected
+             |     `----------- HDMI3, LVDS1, VGA1, etc.
+              `---------------- keyboard, pointer, display
 
 The script may be called like this, notice how the description is not
 included for displays:
 
-    ~/.xplugrc display HDMI3 disconnected
-    ~/.xplugrc keyboard 3 connected "Topre Corporation Realforce 87"
+    xplugrc display HDMI3 disconnected
+    xplugrc keyboard 3 connected "Topre Corporation Realforce 87"
 
 The keyboard or pointer is always the X slave keyboard or pointer, and
 the status encoding for `XIStatusEnabled` and `XIStatusDisabled` is
@@ -46,7 +48,7 @@ If EDID data is available from a connected display, the monitor model is
 passed in as fourth argument ("Optional Description") to the script.
 
 
-### Example ~/.xplugrc
+### Example ~/.config/xplugrc
 
 ```sh
 #!/bin/sh
