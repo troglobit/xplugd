@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2012-2015  Stefan Bolte <portix@gmx.net>
  * Copyright (C) 2013-2015  Andrew Shadura <andrewsh@debian.org>
- * Copyright (C) 2016-2018  Joachim Nilsson <troglobit@gmail.com>
+ * Copyright (C) 2016-2019  Joachim Nilsson <troglobit@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -136,7 +136,7 @@ static int usage(int status)
 	       "            Fallback also checks for ~/.config/xplugrc and ~/.xplugrc\n"
 	       "\n"
 	       "Copyright (C) 2012-2015  Stefan Bolte\n"
-	       "Copyright (C) 2016-2018  Joachim Nilsson\n\n"
+	       "Copyright (C) 2016-2019  Joachim Nilsson\n\n"
 	       "Bug report address: %s\n", prognm, PACKAGE_BUGREPORT);
 	return status;
 }
