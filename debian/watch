@@ -1,0 +1,3 @@
+version=3
+opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.xz/xplugd-$1\.tar\.xz/ \
+  https://github.com/troglobit/xplugd/releases .*/xplugd-?(\d\S*)\.tar\.xz

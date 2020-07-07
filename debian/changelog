@@ -1,0 +1,5 @@
+xplugd (1.4) stable; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- Joachim Nilsson <troglobit@gmail.com>  Tue, 07 Jul 2020 19:43:16 +0200
