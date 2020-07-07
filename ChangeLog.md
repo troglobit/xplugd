@@ -4,6 +4,16 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[v1.4][UNRELEASED]
+------------------
+
+### Changes
+- Pending ...
+
+### Fixes
+- Pending ...
+
+
 [v1.3][] - 20018-02-01
 ----------------------
 
@@ -46,10 +56,10 @@ First official release after fork from [srandrd][]
 - Can be used to seamlessly dock/undock
 - Prepared for future support for xinput(1)
 
-	
-[v1.3]: https://github.com/troglobit/xplugd/compare/v1.3...v1.3
-[v1.2]: https://github.com/troglobit/xplugd/compare/v1.1...v1.2
-[v1.1]: https://github.com/troglobit/xplugd/compare/v1.0...v1.1
-[v1.0]: https://github.com/troglobit/xplugd/compare/v0.5...v1.0
-[srandrd]:   https://bitbucket.org/portix/srandrd
-[inputplug]: https://bitbucket.org/andrew_shadura/inputplug
+[UNRELEASED]: https://github.com/troglobit/xplugd/compare/v1.3...HEAD
+[v1.3]:       https://github.com/troglobit/xplugd/compare/v1.3...v1.3
+[v1.2]:       https://github.com/troglobit/xplugd/compare/v1.1...v1.2
+[v1.1]:       https://github.com/troglobit/xplugd/compare/v1.0...v1.1
+[v1.0]:       https://github.com/troglobit/xplugd/compare/v0.5...v1.0
+[srandrd]:    https://bitbucket.org/portix/srandrd
+[inputplug]:  https://bitbucket.org/andrew_shadura/inputplug
