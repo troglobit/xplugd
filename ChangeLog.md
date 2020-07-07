@@ -53,9 +53,3 @@ First official release after fork from [srandrd][]
 [v1.0]: https://github.com/troglobit/xplugd/compare/v0.5...v1.0
 [srandrd]:   https://bitbucket.org/portix/srandrd
 [inputplug]: https://bitbucket.org/andrew_shadura/inputplug
-
-<!--
-  -- Local Variables:
-  -- mode: markdown
-  -- End:
-  -->

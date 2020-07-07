@@ -125,9 +125,3 @@ to the `xplugd` project.
 [Travis Status]: https://travis-ci.org/troglobit/xplugd.png?branch=master
 [Coverity Scan]:   https://scan.coverity.com/projects/10739
 [Coverity Status]: https://scan.coverity.com/projects/10739/badge.svg
-
-<!--
-  -- Local Variables:
-  -- mode: markdown
-  -- End:
-  -->
