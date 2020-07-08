@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.Dd Apr 19, 2019
+.Dd Jul 8, 2020
 .\" Please adjust this date whenever revising the manpage.
 .Dt XPLUGD 1 URM
 .Os
@@ -75,20 +75,22 @@ device number.
 One of
 .Ar connected | disconnected | unknown
 .It $4 = Ar DESCRIPTION
-An optional description enclosed in double quotes, only used for
-.Xr xinput 1
-devices, like the keyboard manufacturer and model name.
+An optional description enclosed in double quotes, e.g., keyboard
+(manufacturer and) model name, or if EDID data is available from a
+connected display, the monitor model
 .El
 .Sh EXAMPLE
 Here is an example of how to use
 .Nm :
 .Bd -literal -offset indent
-xplugd my-script.sh
+xplugd
 .Ed
 .Pp
-Where
-.Pa my-script.sh
-could look something like this:
+When
+.Nm
+starts it looks for the file
+.Pa ~/.config/xplugrc ,
+which may look something like this:
 .Bd -literal -offset indent
 #!/bin/sh
 
