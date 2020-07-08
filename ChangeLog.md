@@ -4,14 +4,26 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[v1.4][UNRELEASED]
-------------------
+[v1.4][] - 2020-07-08
+---------------------
+
+Huge props to Magnus Malm for helping out with many of the fixes
+and features added in this release.  Thank you!
 
 ### Changes
-- Pending ...
+- Support for EDID matching, i.e. monitor description information,
+  by Magnus Malm
+- Support for querying currently attached monitors for EDID info
+  using `xplugd -p`, by Magnus Malm
+- Support XDG Base Directory, xplugd now first looks for xplugrc
+  in `~/.config/xplugrc`, with compat fallback to `~/.xplugrc`.
+  Initial patch by hydraz
+- Debian package support, use `make package` to build, or use the
+  pre-built x86_64 package from https://deb.troglobit.com
 
 ### Fixes
-- Pending ...
+- Support building on older musl libc based systems that do not yet
+  support `GLOB_TILDE`.  Used when looking for xplugrc file
 
 
 [v1.3][] - 20018-02-01
@@ -56,8 +68,9 @@ First official release after fork from [srandrd][]
 - Can be used to seamlessly dock/undock
 - Prepared for future support for xinput(1)
 
-[UNRELEASED]: https://github.com/troglobit/xplugd/compare/v1.3...HEAD
-[v1.3]:       https://github.com/troglobit/xplugd/compare/v1.3...v1.3
+[UNRELEASED]: https://github.com/troglobit/xplugd/compare/v1.4...HEAD
+[v1.4]:       https://github.com/troglobit/xplugd/compare/v1.3...v1.4
+[v1.3]:       https://github.com/troglobit/xplugd/compare/v1.2...v1.3
 [v1.2]:       https://github.com/troglobit/xplugd/compare/v1.1...v1.2
 [v1.1]:       https://github.com/troglobit/xplugd/compare/v1.0...v1.1
 [v1.0]:       https://github.com/troglobit/xplugd/compare/v0.5...v1.0

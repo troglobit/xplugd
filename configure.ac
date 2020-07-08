@@ -1,4 +1,4 @@
-AC_INIT([xplugd],[1.4-beta1],[https://github.com/troglobit/xplugd/issues])
+AC_INIT([xplugd], [1.4], [https://github.com/troglobit/xplugd/issues])
 AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 

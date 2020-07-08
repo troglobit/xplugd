@@ -1,5 +1,7 @@
 xplugd (1.4) stable; urgency=medium
 
-  * Initial Debian packaging.
+  * Support EDID matching in xplugrc and probing from command line
+  * Support XDG Base Directory, look for .xplugrc in ~/.config
+  * Initial Debian packaging
 
- -- Joachim Nilsson <troglobit@gmail.com>  Tue, 07 Jul 2020 19:43:16 +0200
+ -- Joachim Nilsson <troglobit@gmail.com>  Wed, 08 Jul 2020 11:01:03 +0200
