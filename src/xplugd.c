@@ -128,7 +128,7 @@ static int usage(int status)
 	       "  -h        Print this help text and exit\n"
 	       "  -l LEVEL  Set log level: none, err, info, notice*, debug\n"
 	       "  -n        Run in foreground, do not fork to background\n"
-	       "  -p        Probe currently connected outputs and output EDID info.\n"
+	       "  -p        Probe currently connected outputs and output EDID info\n"
 	       "  -s        Use syslog, even if running in foreground, default w/o -n\n"
 	       "  -v        Show program version\n"
 	       "\n"
