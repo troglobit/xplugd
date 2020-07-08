@@ -11,7 +11,7 @@
 .Nd an X input/output plug in/out helper
 .Sh SYNOPSIS
 .Nm
-.Op Fl hnv
+.Op Fl hnpsv
 .Op Fl l Ar LEVEL
 .Ar [FILE]
 .Sh DESCRIPTION
@@ -40,9 +40,12 @@ is one of: none, err, info,
 .Ar notice ,
 debug.  Use
 .Fl l Ar debug
-to enable debug messages
+to enable debug messages.  Default:
+.Ar notice
 .It Fl n
 Run in foreground, do not detach from calling terminal and fork to background
+.It Fl p
+Probe currently connected outputs and output EDID info
 .It Fl s
 Use syslog, even if running in foreground, default w/o
 .Fl n
