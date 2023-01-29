@@ -1,7 +1,7 @@
 Source: xplugd
 Section: x11
 Priority: optional
-Maintainer: Joachim Nilsson <troglobit@gmail.com>
+Maintainer: Joachim Wiberg <troglobit@gmail.com>
 Homepage: https://github.com/troglobit/xplugd
 Build-Depends: debhelper (>= 10), libx11-dev, libxi-dev, libxrandr-dev
 Standards-Version: 4.3.0
