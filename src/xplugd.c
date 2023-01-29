@@ -23,8 +23,10 @@
  */
 
 #define SYSLOG_NAMES
-#include <alloca.h>
 #include <glob.h>
+#ifndef GLOB_TILDE
+# include <alloca.h>
+#endif
 #include "xplugd.h"
 
 int loglevel = LOG_NOTICE;
